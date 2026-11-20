@@ -1,0 +1,1534 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>瓦茲科技 簡報 黑白像素</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   CIS 替換區（銀河玻璃版）
+   顏色、字體、標誌（<symbol id="logo">）換掉即可套用公司 CIS
+   ========================================================= */
+:root{
+  /* 版面：深空星場 + 彩色星雲，內容放在液態玻璃面板上，換頁時以光速穿越 */
+  --bg:#02030A;
+  --fg:#EEF1FF;
+  --sub:rgba(214,222,255,.6);
+  --hair:rgba(200,210,255,.16);
+  --g1:#CFE3FF;   /* 強調漸層：星光 */
+  --g2:#FFFFFF;
+  --g3:#FFC9A0;
+  --a:#7CC8FF;    /* A 我付出 */
+  --b:#FFC27A;    /* B 我得到 */
+  --alert:#FF7A85;
+  --radius:40px;
+  --node-fill:rgba(160,180,255,.07);
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  --font-title:"Inter",-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  --title-w:700;
+  --title-ls:-.005em;
+  color-scheme:dark;
+}
+/* ========================================================= */
+
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+/* 星雲做成正方形、邊長大於螢幕對角線，旋轉到任何角度邊緣都不會進到畫面（寬螢幕時原本會露出斜線） */
+#nebula{position:fixed;left:50%;top:50%;width:150vmax;height:150vmax;margin:-75vmax 0 0 -75vmax;z-index:1;pointer-events:none;opacity:.9;mix-blend-mode:screen;
+  background:
+    radial-gradient(40.5% 18% at 28.7% 44%,rgba(70,100,230,.6),transparent 70%),
+    radial-gradient(32% 15.6% at 71.3% 57.2%,rgba(170,70,170,.45),transparent 70%),
+    radial-gradient(27.7% 12% at 58.5% 38%,rgba(40,160,200,.42),transparent 70%),
+    linear-gradient(115deg,transparent 38%,rgba(180,190,255,.1) 50%,transparent 62%);
+  will-change:transform;animation:drift 160s linear infinite;transition:transform .7s cubic-bezier(.7,0,.25,1),opacity .7s ease}
+@keyframes drift{to{rotate:360deg}}
+body.warping #nebula{transform:scale(1.35);opacity:.5}
+
+/* 邊緣霧化：外圍是模糊的星空，再疊一層緩慢流動的霧，越往中心越清楚 */
+/* 效能：模糊和中心漸層都在 1/6 解析度的小畫布上做好，放大後自然柔化；
+   不用整頁 blur、CSS 遮罩或混合模式，換頁時顯示卡不必每格多算好幾層全螢幕畫面 */
+#fog{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#mist{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;
+  background:radial-gradient(ellipse 72% 68% at 50% 50%,transparent 36%,rgba(125,140,218,.08) 70%,rgba(158,172,238,.17) 100%)}
+#mist::before,#mist::after{content:"";position:absolute;inset:-18%;will-change:transform}
+#mist::before{
+  background:
+    radial-gradient(30% 36% at 6% 22%,rgba(145,164,246,.3),transparent 70%),
+    radial-gradient(32% 28% at 92% 78%,rgba(188,150,238,.25),transparent 70%),
+    radial-gradient(43% 20% at 50% 100%,rgba(128,180,238,.15),transparent 70%);
+  animation:mistA 34s ease-in-out infinite alternate}
+#mist::after{
+  background:
+    radial-gradient(28% 32% at 94% 18%,rgba(128,188,242,.24),transparent 70%),
+    radial-gradient(32% 34% at 4% 82%,rgba(168,145,240,.25),transparent 70%),
+    radial-gradient(45% 18% at 50% 0%,rgba(155,168,246,.14),transparent 70%);
+  animation:mistB 47s ease-in-out infinite alternate}
+@keyframes mistA{from{transform:translate(-2.5%,1.5%) rotate(-3deg) scale(1)}to{transform:translate(2.5%,-2%) rotate(4deg) scale(1.1)}}
+@keyframes mistB{from{transform:translate(2%,-1.5%) rotate(3deg) scale(1.08)}to{transform:translate(-2.5%,2%) rotate(-4deg) scale(1)}}
+body.warping #mist{opacity:.6;transition:opacity .7s ease}
+#mist{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){#mist::before,#mist::after{animation:none}}
+
+/* 液態玻璃 */
+.glass{
+  background:linear-gradient(145deg,rgba(255,255,255,.17),rgba(255,255,255,.05) 42%,rgba(255,255,255,.09));
+  -webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
+  border:1px solid rgba(255,255,255,.2);
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),inset 0 -1px 0 rgba(255,255,255,.12),inset 0 0 40px rgba(255,255,255,.04),0 40px 90px rgba(0,0,0,.35);
+  overflow:hidden}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(520px circle at var(--mx,25%) var(--my,0%),rgba(255,255,255,.28),transparent 45%);mix-blend-mode:overlay}
+#dock.glass{border-radius:999px}
+
+
+/* 標題細字、重點加粗 */
+
+/* 換頁：光速穿越 —— 舊頁衝向鏡頭消失，新頁從遠方抵達 */
+/* 效能：整頁只做位移縮放和透明度（GPU 直接合成），不做整頁模糊 */
+/* 時間縮短：舊頁 .55s 離場、新頁 .25s 後接上，整段約 .8 秒（原本約 1.5 秒） */
+.slide{transition:opacity .35s ease,transform .55s cubic-bezier(.7,0,.25,1),visibility 0s .55s}
+#stage[data-dir="fwd"] .slide{transform:scale(.55)}
+#stage[data-dir="fwd"] .slide.leaving{transform:scale(1.7);opacity:0}
+#stage[data-dir="back"] .slide{transform:scale(1.7)}
+#stage[data-dir="back"] .slide.leaving{transform:scale(.55);opacity:0}
+#stage .slide.active{transform:none;opacity:1;transition:opacity .45s ease .28s,transform .7s cubic-bezier(.16,1,.3,1) .25s,visibility 0s}
+#stage .slide.active,#stage .slide.leaving{will-change:transform,opacity}
+/* 離場的頁面不再即時模糊背景，省下大量運算（它正在淡出，看不出差別） */
+#stage .slide.leaving .glass{-webkit-backdrop-filter:none;backdrop-filter:none}
+
+/* 元素出場：從星光中浮現 */
+.slide.active .in{animation:emerge 1s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--d,0) * 1s + .35s)}
+@keyframes emerge{from{opacity:0;transform:scale(.94);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
+.frag{opacity:0;transform:scale(.95);filter:blur(10px);transition:opacity .8s ease,transform 1s cubic-bezier(.16,1,.3,1),filter .8s ease}
+.frag.on{opacity:1;transform:none;filter:none}
+/* 玻璃卡片本身已在模糊背景，出場不再疊一層模糊濾鏡 */
+.slide.active .glass.in{animation-name:emergeLite}
+@keyframes emergeLite{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+.glass.frag{filter:none}
+
+/* 達克登場：星光聚集 */
+.spot{position:absolute;width:720px;height:720px;left:50%;top:48%;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,rgba(170,200,255,.3),rgba(120,140,255,.1) 40%,transparent 70%)}
+.frag .robot-stage .art{transform:scale(.6);opacity:0;filter:blur(16px);transition:transform 1.6s cubic-bezier(.16,1,.3,1),opacity 1.2s ease,filter 1.2s ease}
+.frag.on .robot-stage .art{transform:none;opacity:1;filter:none}
+.frag .spot{opacity:0;transform:translate(-50%,-50%) scale(.3);transition:opacity 1.4s ease,transform 2s cubic-bezier(.16,1,.3,1)}
+.frag.on .spot{opacity:1;transform:translate(-50%,-50%) scale(1)}
+
+.list.num li::before{background:linear-gradient(135deg,var(--g1),var(--g3))}
+
+@media (prefers-reduced-motion: reduce){#nebula{animation:none}}
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-smoothing:antialiased}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center;transform:translate(-50%,-50%) scale(.5);z-index:2}
+
+/* 上方資訊 */
+#top{position:absolute;left:140px;right:140px;top:64px;display:flex;justify-content:space-between;align-items:center;z-index:5;font-size:20px;color:var(--sub);letter-spacing:.06em}
+.brand{display:flex;align-items:center;gap:14px;color:var(--fg);font-weight:600;font-size:22px;letter-spacing:.22em}
+.brand svg{width:30px;height:30px}
+#code{font-variant-numeric:tabular-nums}
+
+/* 下方控制列 */
+#dock{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);display:flex;align-items:center;gap:26px;padding:16px 28px;border-radius:999px;z-index:5;font-size:18px;color:var(--sub);font-variant-numeric:tabular-nums;white-space:nowrap}
+.progress{width:240px;height:4px;border-radius:2px;background:var(--hair);overflow:hidden}
+.progress i{display:block;height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3));transition:width .8s cubic-bezier(.2,.8,.2,1)}
+#timer{display:none;align-items:center;gap:14px;cursor:pointer;color:var(--fg);user-select:none;padding-left:24px;border-left:1px solid var(--hair)}
+#timer.show{display:flex}
+#timer svg{width:40px;height:40px;transform:rotate(-90deg)}
+#timer .track{fill:none;stroke:var(--hair);stroke-width:3}
+#timer .ring{fill:none;stroke:url(#gRing);stroke-width:3.5;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+#timer .time{font-size:28px;font-weight:600;min-width:84px;display:block}
+#timer .hint{font-size:14px;color:var(--sub);display:block}
+#timer.done .time{color:var(--alert)}
+#timer.done .ring{stroke:var(--alert)}
+/* 時間到：整個控制列一亮一暗地閃，提醒時間到了 */
+#dock:has(#timer.show.done){animation:tdone 1.2s ease-in-out infinite}
+@keyframes tdone{50%{box-shadow:0 0 0 3px var(--alert),0 0 46px color-mix(in srgb,var(--alert) 65%,transparent)}}
+#timer .time{cursor:text;border-radius:8px;padding:0 4px;margin:0 -4px;transition:background .2s}
+#timer .time:hover{background:var(--hair)}
+#tinput{display:none;width:110px;font:inherit;font-size:28px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--fg);
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:0 8px;outline:none;margin:-2px 0}
+#timer.editing .time{display:none}
+#timer.editing #tinput{display:block}
+.tctl{display:flex;gap:6px;opacity:.55;transition:opacity .3s}
+#timer:hover .tctl{opacity:1}
+.tctl button{font:inherit;font-size:15px;color:var(--fg);background:var(--hair);border:0;border-radius:999px;padding:6px 13px;cursor:pointer}
+.tctl button:hover,.tctl button:focus-visible{background:var(--fg);color:var(--bg);outline:none}
+
+/* 投影片 */
+.slide{position:absolute;inset:0;padding:180px 160px 200px;display:flex;flex-direction:column;justify-content:center;gap:44px;opacity:0;visibility:hidden;pointer-events:none}
+.slide.active{opacity:1;visibility:visible;pointer-events:auto}
+.center{align-items:center;text-align:center}
+/* 字距會在最後一個字後面多留空白，置中時往左偏；左邊補同樣的距離抵銷 */
+.center .eyebrow{padding-left:.16em}
+/* 句尾問號懸在行外，不參與置中，讓文字本身置中 */
+.hang{display:inline-block;width:1em;margin-right:-1em;text-align:left}
+.notes{display:none}
+
+/* 字級 */
+.eyebrow{font-size:26px;font-weight:500;color:var(--sub);letter-spacing:.16em;margin:0}
+.t1,.t2,.t3,.t4{font-family:var(--font-title);font-weight:var(--title-w);letter-spacing:var(--title-ls);margin:0;text-wrap:balance}
+.t1{font-size:148px;line-height:1.14}
+.t2{font-size:108px;line-height:1.18}
+.t3{font-size:78px;line-height:1.26}
+.t4{font-size:54px;line-height:1.3}
+.lead{font-size:40px;line-height:1.6;color:var(--sub);margin:0;font-weight:400}
+.body{font-size:36px;line-height:1.6;margin:0}
+.grad{background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3),var(--g1));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:sheen 12s linear infinite}
+@keyframes sheen{to{background-position:300% 0}}
+.alert{color:var(--alert)}
+.strong{font-weight:700}
+
+/* 版面 */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center}
+.cols > *{min-width:0}
+.cols.l{grid-template-columns:7fr 5fr}
+.cols.r{grid-template-columns:5fr 7fr}
+.stack{display:flex;flex-direction:column;gap:30px}
+.panel{border-radius:var(--radius);padding:44px 50px;position:relative}
+
+/* 列表與標籤 */
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:28px}
+.list li{font-size:38px;line-height:1.5;display:flex;gap:26px;align-items:baseline}
+.list li::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--g1),var(--g3));transform:translateY(-6px)}
+.list.num{counter-reset:n}
+.list.num li::before{counter-increment:n;content:counter(n);width:50px;height:50px;display:grid;place-items:center;font-size:24px;font-weight:700;color:var(--bg);transform:translateY(-4px)}
+.chip{display:inline-flex;align-items:center;font-size:28px;font-weight:600;padding:6px 22px;border-radius:999px;line-height:1.4;white-space:nowrap}
+.chip.a{color:var(--a);background:color-mix(in srgb,var(--a) 15%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--a) 55%,transparent)}
+.chip.b{color:var(--b);background:color-mix(in srgb,var(--b) 15%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--b) 55%,transparent)}
+.pair{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.sheet{font-size:22px;letter-spacing:.14em;color:var(--sub)}
+
+/* 規格卡 */
+.specs{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.spec{display:flex;flex-direction:column;justify-content:space-between;gap:40px;min-height:300px}
+.spec .i{font-size:22px;font-weight:600;color:var(--sub);letter-spacing:.14em}
+.spec .t{font-size:50px;font-weight:700;line-height:1.3}
+
+/* 財報 */
+.report-head{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.report-head .t4{white-space:nowrap;font-size:46px;font-weight:700;letter-spacing:0}
+.stamp{flex:none;white-space:nowrap;font-size:20px;font-weight:600;color:var(--alert);padding:6px 16px;border-radius:999px;background:color-mix(in srgb,var(--alert) 16%,transparent);letter-spacing:.12em}
+table.ledger{width:100%;border-collapse:collapse;font-size:32px}
+.ledger th{font-size:20px;letter-spacing:.12em;color:var(--sub);font-weight:500;text-align:left;padding:18px 0 12px}
+.ledger td{padding:20px 0;border-top:1px solid var(--hair);font-variant-numeric:tabular-nums}
+.ledger td.num{font-weight:500}
+.ledger td.bad{color:var(--alert);font-weight:700}
+.ledger small{font-size:20px;color:var(--sub);margin-left:10px;font-weight:400}
+.kpi{display:flex;align-items:baseline;gap:28px}
+.kpi .v{font-size:132px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--alert)}
+.kpi .k{font-size:30px;color:var(--sub)}
+.chart text{font-family:var(--font)}
+.chart .grid{stroke:var(--hair);stroke-width:1}
+.chart .axis{fill:var(--sub);font-size:18px}
+.chart .q{fill:var(--fg);font-size:22px;text-anchor:middle;font-weight:600}
+.chart .val{font-size:20px;text-anchor:middle;fill:var(--alert);font-weight:700}
+.chart .exp{fill:var(--hair)}
+.chart .act{fill:url(#gAlert)}
+.chart .bar{transform-box:fill-box;transform-origin:bottom}
+.slide.active .chart .bar{animation:grow 1.3s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--d,0) * 1s + .3s)}
+@keyframes grow{from{transform:scaleY(0)}}
+.legend{display:flex;gap:34px;font-size:18px;color:var(--sub)}
+.legend span{display:flex;align-items:center;gap:10px}
+.legend i{width:20px;height:12px;border-radius:3px;display:inline-block}
+.foot{font-size:26px;color:var(--sub);margin:0}
+.foot b{color:var(--fg)}
+
+/* 對照 */
+.versus{display:grid;grid-template-columns:1fr 1fr;gap:60px}
+.versus > *{min-width:0}
+.pcol{display:flex;flex-direction:column;gap:22px}
+.pcol .art{height:250px;align-self:center}
+.pcol .art.d{width:140px}
+.pcol .art.k{width:240px}
+.pcol .name{font-size:84px;font-weight:700;line-height:1.05}
+.row{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--hair);padding-top:18px;gap:24px}
+.row .k{font-size:22px;letter-spacing:.12em;color:var(--sub)}
+.row .v{font-size:38px;font-weight:700}
+
+/* W6 四格 */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.tile{display:flex;flex-direction:column;gap:20px;min-height:340px}
+.tile .k{font-size:54px;font-weight:700}
+.tile .d{font-size:29px;line-height:1.6;color:var(--sub)}
+.tile svg{width:64px;height:64px}
+.icon{fill:none;stroke:var(--fg);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+
+/* W8 提案單 */
+.field{display:grid;grid-template-columns:80px 1fr;align-items:center;gap:24px;padding:24px 0;border-top:1px solid var(--hair)}
+.field:first-child{border-top:0}
+.field .n{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:700;color:var(--bg);background:linear-gradient(135deg,var(--g1),var(--g3))}
+.field .q{font-size:40px;font-weight:600;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+
+/* 關係圖 */
+.diagram text{font-family:var(--font)}
+.node{fill:var(--node-fill);stroke:var(--hair);stroke-width:2}
+.node.self{fill:url(#gSelf);stroke:none}
+.node.dash{fill:none;stroke:var(--sub);stroke-dasharray:8 10;opacity:.6}
+.arrow{fill:none;stroke-width:4;stroke-linecap:round}
+.arrow.a{stroke:var(--a)}
+.arrow.b{stroke:var(--b)}
+.dot.a{fill:var(--a)}
+.dot.b{fill:var(--b)}
+.dlabel{font-size:32px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dlabel.a{fill:var(--a)}
+.dlabel.b{fill:var(--b)}
+.ntext{font-size:34px;font-weight:700;fill:var(--fg);text-anchor:middle;dominant-baseline:central}
+.ntext.s{font-size:28px;fill:var(--sub);font-weight:500}
+.ntext.dark{fill:#15161A}
+
+/* 機器人 */
+.art svg{width:100%;height:100%;overflow:visible;display:block}
+.dak-body{animation:float 6s ease-in-out infinite}
+.dak-core{transform-box:fill-box;transform-origin:center;animation:pulse 3s ease-in-out infinite}
+.kp{transform-box:fill-box;transform-origin:50% 100%;animation:tilt 6s ease-in-out infinite}
+.kp-eye{transform-box:fill-box;transform-origin:center;animation:blink 5.5s infinite}
+.kp-light{transform-box:fill-box;transform-origin:center;animation:pulse 2.8s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+@keyframes pulse{50%{opacity:.5;transform:scale(.85)}}
+@keyframes tilt{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2.5deg) translateY(-3px)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+.reflect{-webkit-box-reflect:below 2px linear-gradient(transparent 74%,rgba(255,255,255,.16))}
+.robot-stage{position:relative;height:640px;display:grid;place-items:center}
+.robot-stage .art{height:540px;width:290px;position:relative;z-index:1}
+
+/* P4：先大字介紹，點擊後大字退場、達克登場 */
+.p4-intro{position:absolute;inset:0;display:grid;place-items:center;padding:0 160px;text-align:center;pointer-events:none;
+  transition:opacity .7s ease,transform 1s cubic-bezier(.2,.8,.2,1),filter .7s ease}
+.p4:has(.frag.on) .p4-intro{opacity:0;transform:scale(1.12);filter:blur(12px);transition:opacity .6s ease,transform .8s cubic-bezier(.4,0,.2,1),filter .6s ease}
+
+/* P4：達克登場 —— 星空輕輕加速，名字從模糊中沉穩對焦，背後亮起柔和光暈 */
+.p4 .dak-hero{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:36px;text-align:center;pointer-events:none}
+.p4 .dak-hero.frag{transform:none;filter:none;transition:opacity 0s}
+.dk-name{position:relative;z-index:2;margin:0;font-family:var(--font-title);font-weight:700;font-size:300px;line-height:1;letter-spacing:.08em;padding-left:.08em;opacity:0}
+.dk-sub{position:relative;z-index:2;margin:0;font-size:34px;font-weight:500;letter-spacing:.42em;padding-left:.42em;color:var(--sub);opacity:0}
+.dk-glow{position:absolute;left:50%;top:50%;width:1400px;height:1400px;margin:-700px 0 0 -700px;border-radius:50%;opacity:0;
+  background:radial-gradient(circle,rgba(255,240,222,.32),rgba(200,210,255,.1) 30%,transparent 60%)}
+.dak-hero.on .dk-name{animation:dkRise 1.6s cubic-bezier(.16,1,.3,1) .3s both,sheen 12s linear 1.9s infinite}
+.dak-hero.on .dk-glow{animation:dkGlow 2.4s ease-out .45s both}
+.dak-hero.on .dk-sub{animation:dkSub 1.2s cubic-bezier(.16,1,.3,1) 1.2s both}
+@keyframes dkRise{from{opacity:0;transform:scale(1.22);filter:blur(18px)}to{opacity:1;transform:none;filter:none}}
+@keyframes dkGlow{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes dkSub{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.dak-hero.on .dk-name,.dak-hero.on .dk-sub,.dak-hero.on .dk-glow{animation:none;opacity:1}}
+
+/* P7：達克與 Kopei 的銷售量折線圖 */
+.p7 .sales{display:flex;align-items:center;gap:44px;padding:40px 50px 34px}
+.p7 .chart.line{flex:1;min-width:0;height:auto;display:block}
+.p7 .chart .axis{font-size:24px}.p7 .chart .q{font-size:26px}
+.chart .yr{stroke:var(--hair);stroke-width:1.5;stroke-dasharray:4 8}
+.chart .yt{fill:var(--sub);font-size:24px;text-anchor:middle;letter-spacing:.12em}
+.chart .ln{fill:none;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.chart .ln.dk{stroke:var(--alert);filter:drop-shadow(0 0 10px color-mix(in srgb,var(--alert) 55%,transparent))}
+.chart .ln.kp{stroke:var(--g3);filter:drop-shadow(0 0 10px color-mix(in srgb,var(--g3) 55%,transparent))}
+.chart .pt{opacity:0;stroke:var(--bg);stroke-width:3}
+.chart .pt.dk{fill:var(--alert)}.chart .pt.kp{fill:var(--g3)}
+.chart .end{font-size:32px;font-weight:700;opacity:0}
+.chart .end.dk{fill:var(--alert)}.chart .end.kp{fill:var(--g3)}
+.slide.active .chart .ln.dk{animation:draw 2.2s cubic-bezier(.45,0,.25,1) 1s both}
+.slide.active .chart .ln.kp{animation:draw 2.2s cubic-bezier(.45,0,.25,1) 1.5s both}
+.slide.active .chart .pt.dk{animation:ptIn .4s ease both;animation-delay:calc(1s + var(--i) * .28s)}
+.slide.active .chart .pt.kp{animation:ptIn .4s ease both;animation-delay:calc(1.5s + var(--i) * .28s)}
+.slide.active .chart .end.dk{animation:ptIn .6s ease 3.1s both}
+.slide.active .chart .end.kp{animation:ptIn .6s ease 3.6s both}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes ptIn{from{opacity:0}to{opacity:1}}
+.p7 .who{flex:none;width:400px;display:flex;flex-direction:column;gap:34px}
+.p7 .who .w{display:flex;gap:20px;align-items:flex-start}
+.p7 .who i{flex:none;width:14px;height:56px;border-radius:7px;margin-top:6px}
+.p7 .who b{display:block;font-size:44px;line-height:1.15;margin:6px 0 10px}
+.p7 .who p{margin:0;font-size:28px;line-height:1.5;color:var(--fg)}
+.p7 .who .unit{font-size:20px;color:var(--sub);letter-spacing:.12em}
+/* P7 對比加強：這頁星雲調暗、面板加深，線條加粗加亮，讓折線圖從背景跳出來 */
+body:has(.slide.active.p7) #nebula{opacity:.3}
+.p7 .sales.glass{background:linear-gradient(160deg,rgba(14,18,40,.78),rgba(6,8,20,.86));
+  -webkit-backdrop-filter:blur(40px) saturate(120%);backdrop-filter:blur(40px) saturate(120%);border-color:rgba(255,255,255,.22)}
+.p7{--dk:#FF5A6E;--kp:#FFC857}
+.p7 .chart .grid{stroke:rgba(220,228,255,.18);stroke-width:1.5}
+.p7 .chart .axis,.p7 .chart .yt{fill:rgba(225,232,255,.75)}
+.p7 .chart .q{fill:var(--fg)}
+.p7 .chart .ln{stroke-width:10}
+.p7 .chart .ln.dk{stroke:var(--dk);filter:drop-shadow(0 0 14px color-mix(in srgb,var(--dk) 70%,transparent))}
+.p7 .chart .ln.kp{stroke:var(--kp);filter:drop-shadow(0 0 14px color-mix(in srgb,var(--kp) 70%,transparent))}
+.p7 .chart .pt{r:9;stroke:#0A0C18;stroke-width:4}
+.p7 .chart .pt.dk,.p7 .chart .end.dk{fill:var(--dk)}
+.p7 .chart .pt.kp,.p7 .chart .end.kp{fill:var(--kp)}
+.p7 .chart .end{font-size:36px}
+.p7 .chart .area{clip-path:inset(0 100% 0 0)}
+.p7 .chart .area.dk{fill:url(#gDkArea)}.p7 .chart .area.kp{fill:url(#gKpArea)}
+/* 光和線一起從左往右畫出來 */
+.slide.active.p7 .chart .area.dk{animation:areaIn 2.2s cubic-bezier(.45,0,.25,1) 1s both}
+.slide.active.p7 .chart .area.kp{animation:areaIn 2.2s cubic-bezier(.45,0,.25,1) 1.5s both}
+@keyframes areaIn{to{clip-path:inset(0 0 0 0)}}
+.p7 .who i.dk{background:var(--dk)!important}.p7 .who i.kp{background:var(--kp)!important}
+@media (prefers-reduced-motion: reduce){.slide.active .chart .ln{animation:none;stroke-dashoffset:0}.slide.active .chart .pt,.slide.active .chart .end{animation:none;opacity:1}}
+
+/* W3：情境演出影片 */
+.vslide{gap:30px}
+.vgal{display:flex;flex-direction:column;gap:26px;margin-top:10px}
+.vgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:28px}
+.vcard{position:relative;border-radius:30px;padding:14px 14px 18px;display:flex;flex-direction:column;gap:14px;cursor:default;
+  transition:transform .45s cubic-bezier(.16,1,.3,1),border-color .3s,box-shadow .45s}
+.vcard:hover{transform:translateY(-8px);border-color:rgba(255,255,255,.42)}
+.vcard.ready{cursor:pointer}
+.vcard.ready:hover{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),0 30px 80px rgba(0,0,0,.45),0 0 60px rgba(180,200,255,.2)}
+.vthumb{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:rgba(4,6,16,.7)}
+.vthumb video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease}
+.vcard.ready .vthumb video{opacity:1}
+/* 直式影片：完整顯示，兩側用同一支影片的模糊放大畫面補滿 */
+.vthumb .vbg{filter:blur(18px) brightness(.55);transform:scale(1.3)}
+.vcard.portrait .vthumb video.vfg{object-fit:contain}
+.vcard:not(.portrait) .vbg{display:none}
+.vwait{position:absolute;inset:0;display:grid;place-items:center;border-radius:18px;border:1.5px dashed rgba(220,228,255,.28);
+  font-size:20px;letter-spacing:.14em;color:var(--sub);animation:vbreath 2.8s ease-in-out infinite}
+.vcard.ready .vwait,.vcard.bad .vwait{display:none}
+@keyframes vbreath{50%{border-color:rgba(220,228,255,.55);color:var(--fg);background:rgba(160,180,255,.06)}}
+.vplay{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.18);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.4);
+  opacity:0;transform:scale(.8);transition:opacity .3s,transform .4s cubic-bezier(.16,1,.3,1)}
+.vplay svg{width:30px;height:30px;fill:var(--fg);margin-left:5px}
+.vcard.ready:hover .vplay{opacity:1;transform:none}
+.vbad{display:none;position:absolute;inset:0;padding:14px;flex-direction:column;justify-content:center;gap:6px;text-align:center;font-size:18px;color:var(--alert);line-height:1.4}
+.vbad small{color:var(--sub);font-size:15px;word-break:break-all}
+.vcard.bad .vbad{display:flex}
+.vmeta{display:flex;align-items:baseline;justify-content:space-between;padding:0 6px}
+.vmeta b{font-size:30px;font-weight:700}
+.vmeta span{font-size:20px;color:var(--sub);font-variant-numeric:tabular-nums}
+.vcard.fresh .vthumb{animation:vfresh 1s cubic-bezier(.16,1,.3,1)}
+@keyframes vfresh{from{transform:scale(.92);filter:brightness(2.2)}to{transform:none;filter:none}}
+.vbar{display:flex;align-items:center;gap:16px;font-size:20px;color:var(--sub)}
+.vbar .vstatus{margin-left:auto;letter-spacing:.06em}
+.vbar .vstatus i{display:inline-block;width:9px;height:9px;border-radius:50%;background:#6EE7A8;margin-right:10px;box-shadow:0 0 10px #6EE7A8;animation:vblink 2s ease-in-out infinite}
+@keyframes vblink{50%{opacity:.35}}
+.vbtn{font:inherit;font-size:20px;color:var(--fg);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:10px 24px;cursor:pointer;transition:background .25s}
+.vbtn:hover{background:rgba(255,255,255,.22)}
+.vbtn[hidden]{display:none}
+#vplayer{position:absolute;inset:0;z-index:30;background:rgba(2,3,10,.98);display:flex;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;transition:opacity .45s ease,visibility 0s .45s}
+#vplayer.open{opacity:1;visibility:visible;transition:opacity .45s ease,visibility 0s}
+#vpv{width:1720px;height:880px;object-fit:contain;border-radius:24px;background:transparent;transform:scale(.94);transition:transform .6s cubic-bezier(.16,1,.3,1);cursor:pointer}
+#vplayer.open #vpv{transform:none}
+.vp-top{position:absolute;top:30px;left:100px;right:100px;display:flex;align-items:center;justify-content:space-between}
+.vp-title{font-size:30px;font-weight:700;letter-spacing:.08em}
+.vp-x,.vp-play{flex:none;width:60px;height:60px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:var(--fg);cursor:pointer;display:grid;place-items:center}
+.vp-x:hover,.vp-play:hover{background:rgba(255,255,255,.25)}
+.vp-x .ico,.vp-play .ico{width:26px;height:26px}
+/* 播放時：背景星空、星雲、頁面全部隱藏，控制列不做即時模糊，避免和影片搶顯示卡 */
+body.vplaying #stars,body.vplaying #fog,body.vplaying #mist,body.vplaying #nebula,body.vplaying .slide,body.vplaying #dock,body.vplaying #top{visibility:hidden}
+#vplayer .vp-bar{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(22,26,48,.9)}
+.vp-bar{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:1100px;display:flex;align-items:center;gap:24px;padding:10px 26px 10px 12px;border-radius:999px}
+.vp-play .vp-i-pause{display:none}
+#vplayer.playing .vp-play .vp-i-pause{display:block}
+#vplayer.playing .vp-play .vp-i-play{display:none}
+.vp-i-play path{fill:var(--fg)}
+.vp-prog{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.18);cursor:pointer;position:relative}
+.vp-prog i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:4px;background:linear-gradient(90deg,var(--g1),var(--g3))}
+.vp-time{font-size:20px;color:var(--sub);font-variant-numeric:tabular-nums;min-width:150px;text-align:right}
+
+/* P5：達克的三項能力小動畫 */
+.p5 .spec{justify-content:flex-start;gap:18px;min-height:0}
+.p5 .spec .t{font-size:42px;line-height:1.3}
+.spec .d{font-size:26px;line-height:1.55;color:var(--sub)}
+.scene{width:100%;height:170px;display:block;overflow:visible}
+.sc-line{stroke:var(--hair);stroke-width:2}
+.sc-person{fill:color-mix(in srgb,var(--fg) 82%,transparent)}
+.sc-box{fill:none;stroke:var(--sub);stroke-width:2}
+.sc-text{font-family:var(--font);font-size:21px;fill:var(--fg)}
+.s3-c{fill:none;stroke:var(--a);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.s1-smile,.s1-heart,.s2-check,.s2-bubble{opacity:0}
+.s1-heart,.s2-check{transform-box:fill-box;transform-origin:center}
+.s3-prog{transform-box:fill-box;transform-origin:left;transform:scaleX(0)}
+.s-flow{stroke-dasharray:6 9}
+.frag.on .s-flow,.slide.active .spec.in .s-flow{animation:sflow 1.1s linear infinite}
+.frag.on .s1-frown,.slide.active .spec.in .s1-frown{animation:s1f 4.5s ease infinite}
+.frag.on .s1-smile,.slide.active .spec.in .s1-smile{animation:s1s 4.5s ease infinite}
+.frag.on .s1-heart,.slide.active .spec.in .s1-heart{animation:s1h 4.5s ease infinite}
+.frag.on .s2-carrier,.slide.active .spec.in .s2-carrier{animation:s2m 5s cubic-bezier(.5,0,.3,1) infinite}
+.frag.on .s2-bubble,.slide.active .spec.in .s2-bubble{animation:s2b 5s ease infinite}
+.frag.on .s2-steam,.slide.active .spec.in .s2-steam{animation:steam 1.6s ease-in-out infinite}
+.frag.on .s2-check,.slide.active .spec.in .s2-check{animation:s2k 5s ease infinite}
+.frag.on .s3-bob,.slide.active .spec.in .s3-bob{animation:bob 1.4s ease-in-out infinite}
+.frag.on .s3-a,.slide.active .spec.in .s3-a{animation:s3a 5.6s ease infinite}
+.frag.on .s3-b,.slide.active .spec.in .s3-b{animation:s3b 5.6s ease infinite}
+.frag.on .s3-cc,.slide.active .spec.in .s3-cc{animation:s3c 5.6s ease infinite}
+.frag.on .s3-d,.slide.active .spec.in .s3-d{animation:s3d 5.6s ease infinite}
+.frag.on .s3-prog,.slide.active .spec.in .s3-prog{animation:s3p 5.6s ease infinite}
+@keyframes sflow{to{stroke-dashoffset:-30}}
+@keyframes s1f{0%,40%{opacity:1}50%,94%{opacity:0}100%{opacity:1}}
+@keyframes s1s{0%,40%{opacity:0}50%,92%{opacity:1}100%{opacity:0}}
+@keyframes s1h{0%,42%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1.25)}58%,90%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+@keyframes s2b{0%{opacity:0}5%,32%{opacity:1}40%,100%{opacity:0}}
+@keyframes s2m{0%,14%{transform:translateX(0);opacity:0}20%{transform:translateX(0);opacity:1}50%,88%{transform:translateX(120px);opacity:1}100%{transform:translateX(120px);opacity:0}}
+@keyframes steam{50%{opacity:.3;transform:translateY(-3px)}}
+@keyframes s2k{0%,54%{opacity:0;transform:scale(.4)}61%{opacity:1;transform:scale(1.15)}67%,88%{opacity:1;transform:scale(1)}100%{opacity:0}}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@keyframes s3a{0%,8%{stroke-dashoffset:1}16%,90%{stroke-dashoffset:0}100%{stroke-dashoffset:1}}
+@keyframes s3b{0%,26%{stroke-dashoffset:1}34%,90%{stroke-dashoffset:0}100%{stroke-dashoffset:1}}
+@keyframes s3c{0%,44%{stroke-dashoffset:1}52%,90%{stroke-dashoffset:0}100%{stroke-dashoffset:1}}
+@keyframes s3d{0%,62%{stroke-dashoffset:1}70%,90%{stroke-dashoffset:0}100%{stroke-dashoffset:1}}
+@keyframes s3p{0%,8%{transform:scaleX(0)}16%{transform:scaleX(.25)}34%{transform:scaleX(.5)}52%{transform:scaleX(.75)}70%,90%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+
+/* 達克登場時揮手 */
+.arm-up{transform-box:view-box;transform-origin:195px 142px;transform:rotate(-8deg)}
+.arm-fore{transform-box:view-box;transform-origin:195px 239px;transform:rotate(-2deg)}
+.frag.on .robot-stage .arm-up{animation:dakRaise 4.4s ease-in-out 1.5s both}
+.frag.on .robot-stage .arm-fore{animation:dakWave 4.4s ease-in-out 1.5s both}
+@keyframes dakRaise{0%{transform:rotate(-8deg)}14%,84%{transform:rotate(-125deg)}100%{transform:rotate(-8deg)}}
+@keyframes dakWave{0%{transform:rotate(-2deg)}14%{transform:rotate(-45deg)}24%{transform:rotate(-12deg)}34%{transform:rotate(-50deg)}44%{transform:rotate(-12deg)}54%{transform:rotate(-50deg)}64%{transform:rotate(-12deg)}74%{transform:rotate(-45deg)}84%{transform:rotate(-30deg)}100%{transform:rotate(-2deg)}}
+
+/* 圖示徽章 */
+.badge{width:100px;height:100px;flex:none;border-radius:50%;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--g2) 16%,transparent);
+  box-shadow:inset 0 0 0 1px var(--hair),inset 0 1.5px 0 color-mix(in srgb,var(--fg) 28%,transparent)}
+.panel .badge svg{width:48px;height:48px}
+.badge .icon{stroke:var(--fg);stroke-width:3}
+.ico{width:1em;height:1em;vertical-align:-.14em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* 浮層 */
+#notes{position:fixed;left:0;right:0;bottom:0;z-index:60;max-height:42vh;overflow:auto;background:rgba(10,10,14,.94);color:#F2F2F5;
+  padding:20px max(24px,4vw) 28px;font-size:18px;line-height:1.8;transform:translateY(100%);transition:transform .35s ease;font-family:var(--font)}
+#notes.show{transform:none}
+#notes h4{margin:0 0 8px;font-size:14px;letter-spacing:.16em;font-weight:500;opacity:.6}
+#notes p{margin:0 0 8px}
+#help{position:fixed;inset:0;z-index:70;display:none;place-items:center;background:rgba(0,0,0,.6)}
+#help.show{display:grid}
+#help .box{background:#141418;color:#F2F2F5;border-radius:20px;padding:32px 40px;font-size:18px;line-height:2.1;min-width:min(520px,90vw)}
+#help kbd{font-family:var(--font);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:2px 10px;margin-right:10px}
+#toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:65;font-size:14px;color:#F2F2F5;background:rgba(20,20,26,.8);padding:9px 18px;border-radius:999px;transition:opacity .8s}
+#toast.hide{opacity:0;pointer-events:none}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .dot{display:none}
+}
+
+
+/* =========================================================
+   黑白像素版：覆寫銀河玻璃版的顏色、面板與轉場
+   背景是一片會流動的像素場（點陣抖色＋水平故障條），換頁時整片故障一下
+   ========================================================= */
+:root{
+  --bg:#050505;
+  --fg:#F5F5F5;
+  --sub:rgba(255,255,255,.58);
+  --hair:rgba(255,255,255,.2);
+  --g1:#FFFFFF;--g2:#FFFFFF;--g3:#BDBDBD;
+  --a:#FFFFFF;     /* A 我付出：白 */
+  --b:#9A9A9A;     /* B 我得到：灰 */
+  --alert:#FFFFFF;
+  --radius:4px;
+  --node-fill:rgba(255,255,255,.05);
+  --mono:"JetBrains Mono",ui-monospace,Consolas,"Noto Sans TC","Microsoft JhengHei",monospace;
+}
+#nebula,#fog{display:none!important}
+#stars{image-rendering:pixelated;image-rendering:crisp-edges;width:auto;height:auto;inset:auto;left:0;top:0}
+/* 每個像素之間留一條細縫，做出點陣螢幕的顆粒感（靜態圖層，不吃效能） */
+#mist{background:
+  repeating-linear-gradient(90deg,transparent 0 calc(var(--cell,6px) - var(--gap,1px)),var(--bg) calc(var(--cell,6px) - var(--gap,1px)) var(--cell,6px)),
+  repeating-linear-gradient(0deg,transparent 0 calc(var(--cell,6px) - var(--gap,1px)),var(--bg) calc(var(--cell,6px) - var(--gap,1px)) var(--cell,6px));
+  z-index:0;transition:none;opacity:1!important}
+#mist::before,#mist::after{display:none}
+body.warping #mist{opacity:1}
+
+/* 面板：實心黑底＋細白框，不做毛玻璃（背景再花也讀得到字，也比較省效能） */
+.glass{background:rgba(6,6,6,.9);-webkit-backdrop-filter:none;backdrop-filter:none;
+  border:1.5px solid rgba(255,255,255,.55);box-shadow:none;border-radius:4px}
+.glass::after{display:none}
+#dock.glass{border-radius:4px;background:rgba(6,6,6,.92)}
+.panel,.vcard,.vthumb,.vwait,.vbtn,.vp-x,.vp-play,.vp-bar,#vpv{border-radius:4px!important}
+
+/* 強調字：反白色塊 */
+.grad{background:#F5F5F5;color:#050505;-webkit-text-fill-color:#050505;animation:none;
+  padding:0 .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.dk-name.grad{padding:0 .1em 0 .18em}
+.dak-hero.on .dk-name{animation:dkRise 1.2s steps(10,end) .3s both}
+@keyframes dkRise{from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+.dk-glow{background:radial-gradient(circle,rgba(255,255,255,.12),transparent 55%)}
+.spot{background:radial-gradient(circle,rgba(255,255,255,.14),transparent 60%)}
+
+/* 左上標誌和右上代號：黑底標籤，背景再滿也看得清楚 */
+#top .brand,#code{background:#050505;padding:8px 14px;outline:1.5px solid rgba(255,255,255,.55)}
+
+/* 等寬字：小標、代號、編號、計時 */
+.eyebrow,#code,.spec .i,.vmeta span,#ttime,.ctr,.vp-time,.p7 .who .unit{font-family:var(--mono)}
+.eyebrow{letter-spacing:.18em}
+
+/* 清單點、編號、進度條：方塊 */
+.list li::before,.list.num li::before{background:#F5F5F5;border-radius:0}
+.field .n{background:#F5F5F5;color:#050505;border-radius:2px}
+.progress i{background:#F5F5F5;border-radius:0}
+.vp-prog i{background:#F5F5F5;border-radius:0}
+.vbar .vstatus i{background:#F5F5F5;box-shadow:none;border-radius:0}
+.chip.a,.chip.b{border-radius:2px}
+.stamp{border-radius:2px}
+
+/* 插圖：去色 */
+.scene,.robot-stage,.art{filter:grayscale(1)}
+
+/* P7：白線＝達克、灰線＝Kopei */
+.p7{--dk:#FFFFFF;--kp:#8C8C8C}
+.p7 .sales.glass{background:rgba(5,5,5,.94);-webkit-backdrop-filter:none;backdrop-filter:none;border-color:rgba(255,255,255,.55)}
+.p7 .chart .ln.dk,.p7 .chart .ln.kp{filter:none}
+.p7 .chart .grid{stroke:rgba(255,255,255,.16)}
+.p7 .chart .axis,.p7 .chart .yt{fill:rgba(255,255,255,.7)}
+.p7 .chart .pt{stroke:#050505}
+.p7 .who i{border-radius:0}
+#gDkArea stop{stop-color:#FFFFFF}
+#gKpArea stop{stop-color:#8C8C8C}
+
+/* 轉場：不再縮放穿越，改成數位跳格 —— 舊頁往旁邊一閃消失，新頁一格一格出現 */
+.slide{transition:opacity .22s steps(3,end),transform .3s steps(3,end),visibility 0s .3s}
+#stage[data-dir="fwd"] .slide{transform:translateX(70px)}
+#stage[data-dir="fwd"] .slide.leaving{transform:translateX(-70px);opacity:0}
+#stage[data-dir="back"] .slide{transform:translateX(-70px)}
+#stage[data-dir="back"] .slide.leaving{transform:translateX(70px);opacity:0}
+#stage .slide.active{transform:none;opacity:1;transition:opacity .3s steps(4,end) .2s,transform .35s steps(4,end) .2s,visibility 0s}
+
+/* 元素出場：由左往右一格一格掃出來 */
+.slide.active .in{animation:emerge .7s steps(9,end) both;animation-delay:calc(var(--d,0) * 1s + .35s)}
+@keyframes emerge{from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+.slide.active .glass.in{animation-name:emerge}
+.frag{opacity:0;transform:none;filter:none;clip-path:inset(0 100% 0 0);transition:clip-path .55s steps(8,end),opacity 0s}
+.frag.on{opacity:1;clip-path:inset(0 0 0 0)}
+.p4 .dak-hero.frag{clip-path:none}
+.p4:has(.frag.on) .p4-intro{filter:none;transform:translateX(-80px);transition:opacity .3s steps(3,end),transform .3s steps(3,end)}
+
+.vthumb{background:#0B0B0B}
+.vwait{border-color:rgba(255,255,255,.3)}
+@keyframes vbreath{50%{border-color:rgba(255,255,255,.6);color:var(--fg);background:rgba(255,255,255,.05)}}
+#vplayer .vp-bar{background:rgba(10,10,10,.92)}
+
+/* 時間到：控制列的白框數位式閃爍 */
+#dock:has(#timer.show.done){animation:tdone 1s steps(1,end) infinite}
+@keyframes tdone{50%{box-shadow:0 0 0 3px #F5F5F5;background:#1C1C1C}}
+</style>
+</head>
+<body class="theme-galaxy-glass">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <!-- 公司標誌（CIS 完成後替換這個 symbol） -->
+    <symbol id="logo" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="2.4"/>
+      <path d="M13 17 L19 33 L24 22 L29 33 L35 17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    </symbol>
+    <!-- 小達克（P5 動畫用） -->
+    <symbol id="dakMini" viewBox="0 0 60 120">
+      <rect x="14" y="31" width="5" height="40" rx="2.5" fill="url(#gShell)"/>
+      <rect x="41" y="31" width="5" height="40" rx="2.5" fill="url(#gShell)"/>
+      <rect x="24" y="66" width="5.5" height="48" rx="2.75" fill="url(#gShell)"/>
+      <rect x="30.5" y="66" width="5.5" height="48" rx="2.75" fill="url(#gShell)"/>
+      <rect x="28" y="23" width="4" height="7" fill="#C3C9D1"/>
+      <path d="M20 30 Q30 27 40 30 Q39 52 36 68 Q30 71 24 68 Q21 52 20 30 Z" fill="url(#gShell)"/>
+      <ellipse cx="30" cy="13" rx="9" ry="11" fill="url(#gShell)"/>
+      <path d="M23 14 Q30 17 37 14" fill="none" stroke="#7FDBFF" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <linearGradient id="gRing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--g1)"/><stop offset="1" style="stop-color:var(--g3)"/></linearGradient>
+    <linearGradient id="gSelf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--g1)"/><stop offset=".55" style="stop-color:var(--g2)"/><stop offset="1" style="stop-color:var(--g3)"/></linearGradient>
+    <linearGradient id="gAlert" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--alert)"/><stop offset="1" style="stop-color:var(--alert);stop-opacity:.35"/></linearGradient>
+    <!-- 機器人材質 -->
+    <linearGradient id="gShell" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#DDE1E7"/><stop offset="1" stop-color="#8C939D"/></linearGradient>
+    <linearGradient id="gVisor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2B303A"/><stop offset="1" stop-color="#05070A"/></linearGradient>
+    <radialGradient id="gCore"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".35" stop-color="#A8E8FF"/><stop offset="1" stop-color="#A8E8FF" stop-opacity="0"/></radialGradient>
+    <linearGradient id="gFabric" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F4E1CC"/><stop offset=".55" stop-color="#DDAE8A"/><stop offset="1" stop-color="#9E6A4C"/></linearGradient>
+    <radialGradient id="gWarm"><stop offset="0" stop-color="#FFF4D6"/><stop offset=".45" stop-color="#FFB347"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient>
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8"/></filter>
+    <marker id="mA" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" style="fill:var(--a)"/></marker>
+    <marker id="mB" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" style="fill:var(--b)"/></marker>
+  </defs>
+</svg>
+
+<div id="nebula"></div>
+<canvas id="stars"></canvas>
+<canvas id="fog"></canvas>
+<div id="mist"></div>
+
+<div id="stage" data-dir="fwd">
+  <header id="top">
+    <div class="brand"><svg><use href="#logo"/></svg>瓦茲科技</div>
+    <span id="code">P1</span>
+  </header>
+
+  <!-- ============ 老闆第一段 ============ -->
+
+  <section class="slide center" data-code="P1" data-speaker="執行長">
+    <p class="eyebrow in" style="--d:.1">瓦茲科技</p>
+    <h1 class="t1 in" style="--d:.3">專注於<br><span class="grad">真正熱愛的生活</span></h1>
+    <aside class="notes">
+      <p>「歡迎各位來到瓦茲科技。</p>
+      <p>我們的理念是：專注於真正熱愛的生活。</p>
+      <p>我們相信，每個人的時間和心力都很珍貴，應該留給自己真正在乎的人和事。所以這些年來，我們一直透過科技，把生活中繁瑣的事情接過來，讓大家能專心在熱愛的部分。」</p>
+    </aside>
+  </section>
+
+  <section class="slide center" data-code="P2" data-speaker="執行長">
+    <h2 class="t2 in" style="--d:.15">人的關係<br><span class="grad">建立在需求之上</span></h2>
+    <aside class="notes">
+      <p>「人的關係，建立在需求之上。」</p>
+      <p>（完整講稿待確認）</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-code="P3" data-speaker="執行長">
+    <p class="eyebrow in" style="--d:.1">在共創開始之前，我們想先了解</p>
+    <h2 class="t2 in" style="--d:.25">你生活中重視的<span class="grad">關係</span>，<br>以及它們對你的<span class="grad">意義</span>。</h2>
+    <p class="lead in" style="--d:.5">先不用考慮科技或產品，從自己的經驗出發。</p>
+    <aside class="notes">
+      <p>「因此，在今天的共創活動開始之前，我們想先了解各位生活中重視的關係，以及這些關係對你們而言有什麼意義。</p>
+      <p>請先不用考慮科技或產品，只需要從自己的經驗出發。</p>
+      <p>接下來，請主持人帶大家開始。」</p>
+    </aside>
+  </section>
+
+  <!-- ============ 工作坊：關係 ============ -->
+
+  <section class="slide" data-code="W1" data-speaker="主持人" data-timer="480" data-sheet="學習單 第一頁">
+    <div class="cols l">
+      <div class="stack">
+        <p class="eyebrow in" style="--d:.1">學習單・第一頁</p>
+        <h2 class="t3 in" style="--d:.2">想想你與他人<br>平常如何<span class="grad">相處</span>。</h2>
+        <p class="lead in" style="--d:.35">你帶給對方什麼？對方又帶給你什麼？</p>
+        <ol class="list num in" style="--d:.5">
+          <li>在圓圈中寫下某個對象</li>
+          <li><span>沿著箭頭，寫下你們互動中的交流
+            <span class="pair" style="margin-top:18px"><span class="chip a">A 我付出</span><span class="chip b">B 我得到</span></span></span></li>
+        </ol>
+      </div>
+      <svg class="diagram in" style="--d:.4;width:100%;max-height:720px" viewBox="0 0 600 580" aria-label="關係圖示意">
+        <path id="w1a1" class="arrow a" d="M288 258 V152" marker-end="url(#mA)"/>
+        <path id="w1b1" class="arrow b" d="M312 152 V258" marker-end="url(#mB)"/>
+        <path id="w1a2" class="arrow a" d="M241 372 L155 453" marker-end="url(#mA)" opacity=".7"/>
+        <path id="w1b2" class="arrow b" d="M169 468 L255 387" marker-end="url(#mB)" opacity=".7"/>
+        <path id="w1a3" class="arrow a" d="M359 372 L445 453" marker-end="url(#mA)" opacity=".7"/>
+        <path id="w1b3" class="arrow b" d="M431 468 L345 387" marker-end="url(#mB)" opacity=".7"/>
+        <circle class="dot a" r="6"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath xlink:href="#w1a1"/></animateMotion></circle>
+        <circle class="dot b" r="6"><animateMotion dur="2.4s" begin=".8s" repeatCount="indefinite"><mpath xlink:href="#w1b1"/></animateMotion></circle>
+        <circle class="dot a" r="5"><animateMotion dur="2.8s" begin=".3s" repeatCount="indefinite"><mpath xlink:href="#w1a2"/></animateMotion></circle>
+        <circle class="dot b" r="5"><animateMotion dur="2.8s" begin="1.2s" repeatCount="indefinite"><mpath xlink:href="#w1b3"/></animateMotion></circle>
+        <circle class="node" cx="300" cy="90" r="58"/>
+        <circle class="node dash" cx="120" cy="505" r="52"/>
+        <circle class="node dash" cx="480" cy="505" r="52"/>
+        <circle class="node self" cx="300" cy="330" r="68"/>
+        <text class="dlabel a" x="262" y="205">A</text>
+        <text class="dlabel b" x="338" y="205">B</text>
+        <text class="ntext s" x="300" y="90">對象</text>
+        <text class="ntext dark" x="300" y="330">自己</text>
+      </svg>
+    </div>
+    <aside class="notes">
+      <p>「請翻到學習單第一頁。</p>
+      <p>想想你和身邊的人平常是怎麼相處的。在圓圈裡寫下一個對象，不一定要是人，寵物、植物、一個地方都可以。至少寫一個，虛線的圓圈可以視情況再多寫。</p>
+      <p>然後沿著箭頭，寫下你們之間的交流。從你指出去的箭頭是 A，我付出：你帶給對方什麼？指向你的箭頭是 B，我得到：對方帶給你什麼？</p>
+      <p>箭頭上可以寫具體的事，例如幫忙做什麼、給了什麼東西；也可以寫抽象的感受，例如安心、被理解。兩邊不需要一樣多，照實際情況寫就好，沒有標準答案。」</p>
+      <p>（計時 8 分鐘：按 T 開始）</p>
+      <p>（寫完）「謝謝大家。請把學習單留在手邊，等一下會用到。接下來，請瓦茲科技的執行長再跟大家說幾句話。」</p>
+    </aside>
+  </section>
+
+  <!-- ============ 老闆第二段 ============ -->
+
+  <section class="slide p4" data-code="P4" data-speaker="執行長">
+    <div class="p4-intro">
+      <div class="stack" style="align-items:center;gap:28px">
+        <p class="eyebrow in" style="--d:.1">接下來，讓我介紹</p>
+        <h2 class="t1 in" style="--d:.3">我們最<span class="grad">引以為傲</span>的產品</h2>
+      </div>
+    </div>
+    <div class="dak-hero frag">
+      <div class="dk-glow"></div>
+      <p class="dk-name grad">達克</p>
+      <p class="dk-sub">瓦茲科技　旗艦機器人</p>
+    </div>
+    <aside class="notes">
+      <p>「謝謝各位。</p>
+      <p>接下來，讓我介紹我們公司最引以為傲的產品。」（點擊，達克登場）</p>
+    </aside>
+  </section>
+
+  <section class="slide p5" data-code="P5" data-speaker="執行長">
+    <p class="eyebrow in" style="--d:.1">達克｜經過多年的研發</p>
+    <h2 class="t3 in" style="--d:.2">它已經能夠——</h2>
+    <div class="specs">
+      <div class="glass panel spec in" style="--d:.5">
+        <span class="i">01</span>
+        <svg class="scene" viewBox="0 0 320 180" aria-hidden="true">
+          <line class="sc-line" x1="20" y1="160" x2="300" y2="160"/>
+          <circle class="sc-person" cx="70" cy="72" r="20"/>
+          <rect class="sc-person" x="50" y="98" width="40" height="62" rx="20"/>
+          <circle cx="63" cy="68" r="2.5" style="fill:var(--bg)"/><circle cx="77" cy="68" r="2.5" style="fill:var(--bg)"/>
+          <path class="s1-frown" d="M62 82 Q70 76 78 82" fill="none" stroke-width="2.5" stroke-linecap="round" style="stroke:var(--bg)"/>
+          <path class="s1-smile" d="M62 78 Q70 86 78 78" fill="none" stroke-width="2.5" stroke-linecap="round" style="stroke:var(--bg)"/>
+          <path class="s-flow" d="M102 72 C125 52 140 92 160 72 S195 52 214 72" fill="none" stroke-width="3" stroke-linecap="round" style="stroke:var(--a)"/>
+          <path class="s1-heart" d="M70 30 C70 24 62 20 58 26 C54 32 62 38 70 44 C78 38 86 32 82 26 C78 20 70 24 70 30 Z" style="fill:var(--alert)"/>
+          <use href="#dakMini" x="225" y="40" width="60" height="120"/>
+        </svg>
+        <div class="stack" style="gap:12px"><span class="t">理解情緒</span><span class="d">從語氣、表情和細微的動作，讀懂你現在的心情</span></div>
+      </div>
+      <div class="glass panel spec in" style="--d:1.3">
+        <span class="i">02</span>
+        <svg class="scene" viewBox="0 0 320 180" aria-hidden="true">
+          <line class="sc-line" x1="20" y1="160" x2="300" y2="160"/>
+          <circle class="sc-person" cx="262" cy="74" r="18"/>
+          <rect class="sc-person" x="244" y="96" width="36" height="64" rx="18"/>
+          <g class="s2-bubble">
+            <rect x="190" y="14" width="104" height="32" rx="16" style="fill:color-mix(in srgb,var(--fg) 92%,transparent)"/>
+            <path d="M250 45 L258 55 L262 45 Z" style="fill:color-mix(in srgb,var(--fg) 92%,transparent)"/>
+            <text x="242" y="35" text-anchor="middle" font-size="17" style="fill:var(--bg);font-family:var(--font)">一杯熱茶</text>
+          </g>
+          <g class="s2-carrier">
+            <use href="#dakMini" x="20" y="40" width="60" height="120"/>
+            <rect x="70" y="92" width="18" height="20" rx="4" style="fill:var(--b)"/>
+            <path d="M88 97 q7 0 7 6 q0 6 -7 6" fill="none" stroke-width="2.5" style="stroke:var(--b)"/>
+            <path class="s2-steam" d="M75 86 q-3 -5 0 -10 M83 86 q-3 -5 0 -10" fill="none" stroke-width="2" stroke-linecap="round" style="stroke:var(--sub)"/>
+          </g>
+          <g class="s2-check">
+            <circle cx="222" cy="58" r="14" stroke-width="2" style="fill:color-mix(in srgb,var(--a) 18%,transparent);stroke:var(--a)"/>
+            <path d="M215 58 L220 63 L229 53" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--a)"/>
+          </g>
+        </svg>
+        <div class="stack" style="gap:12px"><span class="t">主動協助生活</span><span class="d">你一開口，它馬上就幫你準備好</span></div>
+      </div>
+      <div class="glass panel spec in" style="--d:2.1">
+        <span class="i">03</span>
+        <svg class="scene" viewBox="0 0 320 180" aria-hidden="true">
+          <use class="s3-bob" href="#dakMini" x="20" y="30" width="60" height="120"/>
+          <rect class="sc-box" x="112" y="23" width="26" height="26" rx="7"/>
+          <rect class="sc-box" x="112" y="57" width="26" height="26" rx="7"/>
+          <rect class="sc-box" x="112" y="91" width="26" height="26" rx="7"/>
+          <rect class="sc-box" x="112" y="125" width="26" height="26" rx="7"/>
+          <path class="s3-c s3-a" pathLength="1" d="M118 36 L123 42 L133 29"/>
+          <path class="s3-c s3-b" pathLength="1" d="M118 70 L123 76 L133 63"/>
+          <path class="s3-c s3-cc" pathLength="1" d="M118 104 L123 110 L133 97"/>
+          <path class="s3-c s3-d" pathLength="1" d="M118 138 L123 144 L133 131"/>
+          <text class="sc-text" x="152" y="44">洗衣服</text>
+          <text class="sc-text" x="152" y="78">煮晚餐</text>
+          <text class="sc-text" x="152" y="112">打掃房間</text>
+          <text class="sc-text" x="152" y="146">繳帳單</text>
+          <rect x="112" y="166" width="190" height="6" rx="3" style="fill:var(--hair)"/>
+          <rect class="s3-prog" x="112" y="166" width="190" height="6" rx="3" fill="url(#gRing)"/>
+        </svg>
+        <div class="stack" style="gap:12px"><span class="t">獨立完成過去需要人類處理的工作</span><span class="d">家事、帳單、照顧家人，不需要任何人插手</span></div>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>「經過多年的研發，我們的機器人已經能夠——理解情緒、主動協助生活，甚至獨立完成過去需要人類處理的工作。」</p>
+      <p>（三張卡片進到這頁後會自動依序出現，不用點擊）</p>
+    </aside>
+  </section>
+
+  <section class="slide center" data-code="P6" data-speaker="執行長">
+    <p class="eyebrow in" style="--d:.1">我們一直相信</p>
+    <h2 class="t2 in" style="--d:.25">讓機器人越來越強大<br>就能讓人們過得<span class="grad">越來越好</span></h2>
+    <aside class="notes">
+      <p>「我們一直相信，讓機器人越來越強大，就能讓人們過得越來越好。」</p>
+      <p>（語氣要真心相信，下一頁的轉折才會出來）</p>
+    </aside>
+  </section>
+
+  <section class="slide p7" data-code="P7" data-speaker="執行長">
+    <p class="eyebrow in alert" style="--d:.1">但最近，我們遇到了一個問題</p>
+    <div class="glass panel in sales" style="--d:.2">
+      <svg class="chart line" viewBox="0 0 1120 620" aria-label="達克與 Kopei 的季銷售量">
+        <line class="grid" x1="80" y1="560" x2="990" y2="560"/><line class="grid" x1="80" y1="393" x2="990" y2="393"/><line class="grid" x1="80" y1="227" x2="990" y2="227"/><line class="grid" x1="80" y1="60" x2="990" y2="60"/>
+        <text class="axis" x="58" y="567" text-anchor="end">0</text><text class="axis" x="58" y="400" text-anchor="end">10</text><text class="axis" x="58" y="234" text-anchor="end">20</text><text class="axis" x="58" y="67" text-anchor="end">30</text>
+        <line class="yr" x1="535" y1="40" x2="535" y2="570"/>
+        <text class="yt" x="275" y="28">去年</text><text class="yt" x="795" y="28">今年</text>
+        <text class="q" x="80" y="608">Q1</text><text class="q" x="210" y="608">Q2</text><text class="q" x="340" y="608">Q3</text><text class="q" x="470" y="608">Q4</text><text class="q" x="600" y="608">Q1</text><text class="q" x="730" y="608">Q2</text><text class="q" x="860" y="608">Q3</text><text class="q" x="990" y="608">Q4</text>
+        <defs><linearGradient id="gDkArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF5A6E" stop-opacity=".2"/><stop offset=".45" stop-color="#FF5A6E" stop-opacity=".07"/><stop offset="1" stop-color="#FF5A6E" stop-opacity="0"/></linearGradient><linearGradient id="gKpArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFC857" stop-opacity=".18"/><stop offset=".45" stop-color="#FFC857" stop-opacity=".06"/><stop offset="1" stop-color="#FFC857" stop-opacity="0"/></linearGradient><linearGradient id="gAreaFade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".08" stop-color="#fff"/><stop offset=".92" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="mArea" maskUnits="userSpaceOnUse" x="0" y="0" width="1120" height="620"><rect x="80" y="0" width="910" height="620" fill="url(#gAreaFade)"/></mask></defs>
+        <g mask="url(#mArea)">
+          <polygon class="area kp" points="80,493 210,477 340,443 470,410 600,377 730,327 860,277 990,227 990,560 80,560"/>
+          <polygon class="area dk" points="80,177 210,143 340,110 470,143 600,160 730,243 860,327 990,377 990,560 80,560"/>
+        </g>
+        <polyline class="ln dk" pathLength="1" points="80,177 210,143 340,110 470,143 600,160 730,243 860,327 990,377"/>
+        <polyline class="ln kp" pathLength="1" points="80,493 210,477 340,443 470,410 600,377 730,327 860,277 990,227"/>
+        <circle class="pt dk" style="--i:0" cx="80" cy="177" r="7"/><circle class="pt dk" style="--i:1" cx="210" cy="143" r="7"/><circle class="pt dk" style="--i:2" cx="340" cy="110" r="7"/><circle class="pt dk" style="--i:3" cx="470" cy="143" r="7"/><circle class="pt dk" style="--i:4" cx="600" cy="160" r="7"/><circle class="pt dk" style="--i:5" cx="730" cy="243" r="7"/><circle class="pt dk" style="--i:6" cx="860" cy="327" r="7"/><circle class="pt dk" style="--i:7" cx="990" cy="377" r="7"/><circle class="pt kp" style="--i:0" cx="80" cy="493" r="7"/><circle class="pt kp" style="--i:1" cx="210" cy="477" r="7"/><circle class="pt kp" style="--i:2" cx="340" cy="443" r="7"/><circle class="pt kp" style="--i:3" cx="470" cy="410" r="7"/><circle class="pt kp" style="--i:4" cx="600" cy="377" r="7"/><circle class="pt kp" style="--i:5" cx="730" cy="327" r="7"/><circle class="pt kp" style="--i:6" cx="860" cy="277" r="7"/><circle class="pt kp" style="--i:7" cx="990" cy="227" r="7"/>
+        <text class="end dk" x="1014" y="387">達克</text>
+        <text class="end kp" x="1014" y="237">Kopei</text>
+      </svg>
+      <div class="who">
+        <div class="w"><i class="dk"></i><div><span class="sheet">瓦茲科技</span><b>達克</b><p>各項性能領先<br>銷售卻一路下滑</p></div></div>
+        <div class="w"><i class="kp"></i><div><span class="sheet">另一家公司</span><b>Kopei</b><p>功能品質較不佳<br>但被大眾接受</p></div></div>
+        <p class="unit">季銷售量（萬台）</p>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>「但最近，我們遇到了一個問題。</p>
+      <p>我們的產品達克，明明在各項性能上都超越其他競爭對手，銷售表現卻不如預期。</p>
+      <p>更令我們意外的是，另一家公司的 Kopei，功能和品質都比較不好，卻被越來越多人接受。」</p>
+      <p>（可選）「其實整個家用機器人市場還在成長，問題不是景氣，而是大家沒有選擇達克。」</p>
+      <p>（折線圖會慢慢畫出來，停留久一點，讓大家看兩條線交叉。數字皆為虛構。）</p>
+    </aside>
+  </section>
+
+  <section class="slide center" data-code="P8" data-speaker="執行長">
+    <p class="eyebrow in" style="--d:.1">我們開始懷疑</p>
+    <h2 class="t2 in" style="--d:.25">人們對機器人的期待<br>是不是不只是<br>它能完成<span class="grad">多少事情</span>？</h2>
+    <aside class="notes">
+      <p>「我們開始懷疑，是不是有些人對機器人的期待，並不只是它能完成多少事情？」</p>
+      <p>（說完停 3 秒，讓問題留在現場）</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-code="P9" data-speaker="執行長">
+    <p class="eyebrow in" style="--d:.1">邀請各位一起共創</p>
+    <h2 class="t2 in" style="--d:.2">設計一台你願意與它<br>建立<span class="grad">某種關係</span>的機器人</h2>
+    <div class="specs" style="grid-template-columns:1fr 1fr">
+      <div class="glass panel in" style="--d:1"><p class="body">它可以非常強大，<br>也可以有自己的限制。</p></div>
+      <div class="glass panel in" style="--d:1.5"><p class="body">最重要的是：<br><span class="grad strong">你為什麼這樣設計？</span></p></div>
+    </div>
+    <aside class="notes">
+      <p>「因此，今天我們想邀請各位一起共創。</p>
+      <p>請根據剛才對人際關係的思考，設計一台你願意與它建立某種關係的機器人。</p>
+      <p>它可以非常強大，也可以有自己的限制。最重要的是，我們想知道你為什麼這樣設計。</p>
+      <p>接下來，請主持人說明設計的方式。」</p>
+    </aside>
+  </section>
+
+  <!-- ============ 工作坊：設計 ============ -->
+
+  <section class="slide" data-code="W2" data-speaker="主持人" data-timer="1500" data-sheet="學習單 第二頁">
+    <p class="eyebrow in" style="--d:.1">學習單・第二頁</p>
+    <h2 class="t3 in" style="--d:.2">創造一個新的<span class="grad">社交角色</span></h2>
+    <div class="cols">
+      <div class="stack in" style="--d:.35">
+        <div class="pair"><span class="chip a">A</span><span class="body">你願意或希望為它做些什麼？</span></div>
+        <div class="pair"><span class="chip b">B</span><span class="body">它會帶給你什麼？</span></div>
+        <ul class="list" style="margin-top:14px">
+          <li>依照說明書的步驟和情境製作</li>
+        </ul>
+      </div>
+      <svg class="diagram in" style="--d:.5;width:100%" viewBox="0 0 700 320" aria-label="自己與 AI 機器人">
+        <path id="w5a" class="arrow a" d="M200 128 H500" marker-end="url(#mA)"/>
+        <path id="w5b" class="arrow b" d="M500 192 H200" marker-end="url(#mB)"/>
+        <circle class="dot a" r="6"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath xlink:href="#w5a"/></animateMotion></circle>
+        <circle class="dot b" r="6"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite"><mpath xlink:href="#w5b"/></animateMotion></circle>
+        <circle class="node self" cx="112" cy="160" r="72"/>
+        <circle class="node" cx="588" cy="160" r="72"/>
+        <text class="dlabel a" x="350" y="94">(A)</text>
+        <text class="dlabel b" x="350" y="228">(B)</text>
+        <text class="ntext dark" x="112" y="160">自己</text>
+        <text class="ntext s" x="588" y="160">AI 機器人</text>
+      </svg>
+    </div>
+    <aside class="notes">
+      <p>「請翻到學習單第二頁。</p>
+      <p>剛剛執行長說，想請大家設計一台你願意與它建立某種關係的機器人。我們要把它想成一個新的社交角色，一個會加入你生活的新成員。</p>
+      <p>中間的箭頭和第一頁一樣有 A 和 B：A 是你願意或希望為它做些什麼？B 是它會帶給你什麼？</p>
+      <p>請依照說明書的步驟和情境來製作。」</p>
+    </aside>
+  </section>
+
+  <section class="slide vslide" data-code="W3" data-speaker="主持人">
+    <p class="eyebrow in" style="--d:.1">小組</p>
+    <h2 class="t3 in" style="--d:.2">把你們的機器人<span class="grad">演出來</span></h2>
+    <p class="lead in" style="--d:.3">每組選一個情境演出</p>
+    <div class="vgal in" style="--d:.45">
+      <div class="vgrid"></div>
+      <div class="vbar">
+        <button type="button" class="vbtn" data-v="pick">選擇影片資料夾</button>
+        <button type="button" class="vbtn" data-v="reconnect" hidden></button>
+        <span class="vstatus">還沒連接影片資料夾</span>
+      </div>
+      <input type="file" class="vinput" webkitdirectory multiple hidden>
+    </div>
+    <aside class="notes">
+      <p>「接下來，請每組選一個情境，把你們的機器人演出來。演的時候請一位組員用手機錄下來，錄好之後上傳到雲端資料夾。上傳完成的影片，會依上傳順序出現在畫面上。」</p>
+      <p>（操作）第一次進這頁先點「選擇影片資料夾」，選 G: 槽裡的影片資料夾。之後每 3 秒會自動抓新影片。</p>
+      <p>（播放）點影片卡放大播放。空白鍵播放／暫停，← → 倒退／快轉 5 秒，Esc 關閉。播放時按鍵不會換頁。</p>
+      <p>（事前準備）資料夾在 G: 槽按右鍵選「離線使用」；iPhone 錄影前把「設定 → 相機 → 格式」改成「最相容」。</p>
+    </aside>
+  </section>
+
+  <section class="slide center" data-code="W4" data-speaker="主持人">
+    <h2 class="t2 in" style="--d:.2">關係是建立在<span class="grad">需求</span>之上</h2>
+    <p class="lead in" style="--d:.6">今天的每一台機器人，都回應了你在關係中的需求</p>
+    <aside class="notes">
+      <p>「謝謝大家今天的設計。就像一開始說的，關係是建立在需求之上，今天的每一台機器人，都回應了你在關係中的需求。</p>
+      <p>也謝謝大家願意寫下自己的關係，那是今天最珍貴的東西。」</p>
+    </aside>
+  </section>
+
+  <div id="vplayer" aria-hidden="true">
+    <video id="vpv" playsinline preload="auto"></video>
+    <div class="vp-top"><span class="vp-title"></span><button type="button" class="vp-x" title="關閉（Esc）"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6 L18 18 M18 6 L6 18"/></svg></button></div>
+    <div class="vp-bar glass">
+      <button type="button" class="vp-play" title="播放／暫停（空白鍵）"><svg class="ico vp-i-play" viewBox="0 0 24 24"><path d="M8 5 L19 12 L8 19 Z"/></svg><svg class="ico vp-i-pause" viewBox="0 0 24 24"><path d="M8 5 V19 M16 5 V19"/></svg></button>
+      <div class="vp-prog"><i></i></div>
+      <span class="vp-time">00:00 / 00:00</span>
+    </div>
+  </div>
+
+  <nav id="dock" class="glass">
+    <div class="progress"><i id="bar"></i></div>
+    <span id="counter">01 / 20</span>
+    <div id="timer" title="點擊開始／暫停；點時間數字可直接輸入">
+      <svg viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="16"/><circle class="ring" id="ring" cx="20" cy="20" r="16"/></svg>
+      <div><span class="time" id="ttime" title="點一下直接輸入時間">00:00</span><input id="tinput" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" aria-label="輸入計時時間，例如 25 或 12:30"><span class="hint" id="thint">按 T 開始計時</span></div>
+      <div class="tctl">
+        <button type="button" data-t="-60" title="減 1 分鐘（-）">−1</button>
+        <button type="button" data-t="60" title="加 1 分鐘（+）">+1</button>
+        <button type="button" data-t="reset" title="從頭開始（R）"><svg class="ico" viewBox="0 0 24 24"><path d="M4.5 12 A7.5 7.5 0 1 0 7 6.4 M4 3 V8 H9"/></svg></button>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<div id="notes"><h4 id="notes-h">講稿</h4><div id="notes-body"></div></div>
+<div id="help"><div class="box">
+  <div><kbd>→</kbd><kbd>空白鍵</kbd>下一步</div>
+  <div><kbd>←</kbd>上一步</div>
+  <div><kbd>N</kbd>顯示／隱藏講稿</div>
+  <div><kbd>T</kbd>計時開始／暫停　<kbd>R</kbd>從頭開始</div>
+  <div><kbd>+</kbd><kbd>-</kbd>計時加減 1 分鐘（也可以點計時器旁的按鈕）</div>
+  <div><kbd>I</kbd>直接輸入時間（或點計時器上的數字），例如 25、12:30</div>
+  <div>影片播放時：<kbd>空白鍵</kbd>播放／暫停　<kbd>←</kbd><kbd>→</kbd>倒退／快轉 5 秒　<kbd>Esc</kbd>關閉</div>
+  <div><kbd>F</kbd>全螢幕</div>
+  <div><kbd>1</kbd><kbd>0</kbd>快速回到第一頁</div>
+  <div><kbd>Home</kbd><kbd>End</kbd>第一頁／最後一頁</div>
+  <div><kbd>?</kbd>關閉這個說明</div>
+</div></div>
+<div id="toast">→ 下一步　N 講稿　T 計時　F 全螢幕　? 說明</div>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage');
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var cur=-1;
+
+  function fit(){var s=Math.min(window.innerWidth/1920,window.innerHeight/1080);stage.style.transform='translate(-50%,-50%) scale('+s+')'}
+  window.addEventListener('resize',fit);fit();
+
+  /* ---- 機器人 ---- */
+  // 達克：修長、沒有五官的雕塑感人形，頭部只有一道光帶，完美而安靜
+  function dakSvg(){
+    var J='#C3C9D1';
+    return '<svg viewBox="0 0 300 560" aria-hidden="true">'+
+      '<style>.dak-band{animation:band 3.2s ease-in-out infinite}@keyframes band{50%{opacity:.45}}</style>'+
+      '<ellipse cx="150" cy="534" rx="80" ry="9" fill="#000" opacity=".5" filter="url(#softShadow)"/>'+
+      '<g class="dak-body">'+
+      /* 手臂（在身體後面） */
+      '<rect x="96" y="140" width="18" height="100" rx="9" fill="url(#gShell)" transform="rotate(8 105 140)"/>'+
+      '<rect x="83" y="239" width="16" height="96" rx="8" fill="url(#gShell)" transform="rotate(2 91 239)"/>'+
+      '<ellipse cx="88" cy="342" rx="8" ry="13" fill="url(#gShell)"/>'+
+      /* 右手（畫面右側）分成上臂、前臂兩段，登場時會舉起來揮手 */
+      '<g class="arm-up"><rect x="186" y="140" width="18" height="100" rx="9" fill="url(#gShell)"/>'+
+      '<g class="arm-fore"><rect x="187" y="239" width="16" height="96" rx="8" fill="url(#gShell)"/><ellipse cx="195" cy="342" rx="8" ry="13" fill="url(#gShell)"/></g>'+
+      '<circle cx="195" cy="239" r="8" fill="'+J+'"/></g>'+
+      '<circle cx="91" cy="239" r="8" fill="'+J+'"/>'+
+      /* 腿 */
+      '<rect x="126" y="294" width="22" height="114" rx="11" fill="url(#gShell)"/>'+
+      '<rect x="152" y="294" width="22" height="114" rx="11" fill="url(#gShell)"/>'+
+      '<rect x="128" y="408" width="19" height="110" rx="9.5" fill="url(#gShell)"/>'+
+      '<rect x="153" y="408" width="19" height="110" rx="9.5" fill="url(#gShell)"/>'+
+      '<circle cx="137" cy="408" r="8" fill="'+J+'"/><circle cx="163" cy="408" r="8" fill="'+J+'"/>'+
+      '<ellipse cx="136" cy="522" rx="14" ry="6" fill="'+J+'"/><ellipse cx="164" cy="522" rx="14" ry="6" fill="'+J+'"/>'+
+      /* 軀幹 */
+      '<circle cx="105" cy="142" r="11" fill="'+J+'"/><circle cx="195" cy="142" r="11" fill="'+J+'"/>'+
+      '<rect x="142" y="100" width="16" height="30" rx="8" fill="'+J+'"/>'+
+      '<path d="M112 136 Q150 124 188 136 Q186 200 176 262 Q150 274 124 262 Q114 200 112 136 Z" fill="url(#gShell)"/>'+
+      '<path d="M126 262 Q150 272 174 262 L170 300 Q150 308 130 300 Z" fill="url(#gShell)"/>'+
+      '<path d="M124 146 Q150 136 176 146" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="2" stroke-linecap="round"/>'+
+      '<path d="M134 214 Q150 222 166 214" fill="none" stroke="#9AA2AD" stroke-opacity=".5" stroke-width="1.2"/>'+
+      /* 頭：沒有五官，只有一道光帶 */
+      '<ellipse cx="150" cy="62" rx="34" ry="42" fill="url(#gShell)"/>'+
+      '<path d="M126 36 Q138 24 154 24" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.5" stroke-linecap="round"/>'+
+      '<path class="dak-band" d="M118 66 Q150 76 182 66" fill="none" stroke="#7FDBFF" stroke-opacity=".55" stroke-width="16" filter="url(#softShadow)" stroke-linecap="round"/>'+
+      '<path class="dak-band" d="M118 66 Q150 76 182 66" fill="none" stroke="#F2FDFF" stroke-width="4" stroke-linecap="round"/>'+
+      '</g></svg>';
+  }
+  // Kopei：桌上型的蛋形陪伴機器人，霧面暖色外殼、一塊會眨眼的小螢幕、沒有手
+  function kopeiSvg(){
+    return '<svg viewBox="0 0 300 310" aria-hidden="true">'+
+      '<ellipse cx="150" cy="292" rx="80" ry="9" fill="#000" opacity=".5" filter="url(#softShadow)"/>'+
+      '<g class="kp">'+
+      '<ellipse cx="150" cy="270" rx="64" ry="14" fill="#2A2D33"/>'+
+      '<rect x="146" y="24" width="8" height="22" rx="4" fill="#4A4F58"/>'+
+      '<circle class="kp-light" cx="150" cy="22" r="16" fill="url(#gWarm)"/>'+
+      '<circle cx="150" cy="22" r="5" fill="#FFE2A8"/>'+
+      '<path d="M150 40 C214 40 250 108 248 168 C246 228 205 262 150 262 C95 262 54 228 52 168 C50 108 86 40 150 40 Z" fill="url(#gFabric)"/>'+
+      '<path d="M98 80 Q150 50 202 80" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="3" stroke-linecap="round"/>'+
+      '<rect x="90" y="122" width="120" height="66" rx="33" fill="#14161A"/>'+
+      '<rect x="100" y="128" width="100" height="9" rx="4.5" fill="#fff" opacity=".08"/>'+
+      '<rect class="kp-eye" x="122" y="143" width="14" height="25" rx="7" fill="#FFE7BF"/>'+
+      '<rect class="kp-eye" x="164" y="143" width="14" height="25" rx="7" fill="#FFE7BF"/>'+
+      '</g></svg>';
+  }
+  [].forEach.call(document.querySelectorAll('[data-art]'),function(el){
+    el.innerHTML=el.dataset.art==='dak'?dakSvg():kopeiSvg();
+  });
+
+  /* ---- 數字計數 ---- */
+  function runCounters(root){
+    [].forEach.call(root.querySelectorAll('[data-count]'),function(el){
+      if(el.closest('.frag:not(.on)'))return;
+      var end=+el.dataset.count,suf=el.dataset.suffix||'',t0=null,dur=1500;
+      el.textContent='0'+suf;
+      setTimeout(function(){
+        function step(ts){if(!t0)t0=ts;var p=Math.min(1,(ts-t0)/dur),e=1-Math.pow(1-p,3);
+          el.textContent=Math.round(end*e)+suf;if(p<1)requestAnimationFrame(step)}
+        requestAnimationFrame(step);
+      },1000);
+    });
+  }
+
+  /* ---- 換頁 ---- */
+  var codeEl=document.getElementById('code'),bar=document.getElementById('bar'),counter=document.getElementById('counter'),
+      notesH=document.getElementById('notes-h'),notesB=document.getElementById('notes-body');
+  function pad(n){return (n<10?'0':'')+n}
+  function updateHud(){
+    var s=slides[cur];
+    codeEl.textContent=s.dataset.code||'';
+    bar.style.width=((cur+1)/slides.length*100)+'%';
+    counter.textContent=pad(cur+1)+' / '+pad(slides.length);
+    var n=s.querySelector('.notes');
+    notesH.textContent='講稿｜'+(s.dataset.code||'')+'｜'+(s.dataset.speaker||'');
+    notesB.innerHTML=n?n.innerHTML:'';
+    renderTimer();
+  }
+  function show(n,all,dir){
+    n=Math.max(0,Math.min(slides.length-1,n));
+    if(n===cur)return;
+    dir=dir||'fwd';
+    stage.dataset.dir=dir;
+    var old=slides[cur];
+    if(old){old.classList.remove('active');old.classList.add('leaving');setTimeout(function(){old.classList.remove('leaving')},800)}
+    cur=n;var s=slides[cur];
+    s.classList.remove('leaving');
+    [].forEach.call(s.querySelectorAll('.frag'),function(f){f.classList.toggle('on',!!all)});
+    void s.offsetWidth;
+    s.classList.add('active');
+    updateHud();runCounters(s);
+    document.dispatchEvent(new CustomEvent('deck:change',{detail:{dir:dir,index:cur,first:!old}}));
+    try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+  }
+  function next(){
+    var s=slides[cur],h=s.querySelector('.frag:not(.on)');
+    if(h){h.classList.add('on');runCounters(h);document.dispatchEvent(new CustomEvent('deck:frag'));return}
+    if(cur<slides.length-1)show(cur+1,false,'fwd');
+  }
+  function prev(){
+    var on=slides[cur].querySelectorAll('.frag.on');
+    if(on.length){on[on.length-1].classList.remove('on');return}
+    if(cur>0)show(cur-1,true,'back');
+  }
+
+  /* ---- 計時器 ---- */
+  var timers={},timerEl=document.getElementById('timer'),ring=document.getElementById('ring'),
+      ttime=document.getElementById('ttime'),thint=document.getElementById('thint'),C=2*Math.PI*16;
+  ring.style.strokeDasharray=C;
+  function tstate(){var t=+slides[cur].dataset.timer||0;if(!t)return null;
+    if(!timers[cur])timers[cur]={total:t,left:t,running:false,last:0};return timers[cur]}
+  function renderTimer(){
+    var st=tstate();timerEl.classList.toggle('show',!!st);
+    if(!st){timerEl.classList.remove('done');return}   /* 沒有計時的頁面：不閃 */
+    var l=Math.max(0,Math.ceil(st.left));
+    ttime.textContent=pad(Math.floor(l/60))+':'+pad(l%60);
+    ring.style.strokeDashoffset=C*(1-st.left/st.total);
+    timerEl.classList.toggle('done',st.left<=0);
+    var sheet=slides[cur].dataset.sheet;
+    thint.textContent=st.left<=0?'時間到':(st.running?'計時中':'按 T 開始')+(sheet?'｜'+sheet:'');
+  }
+  function toggleTimer(){var st=tstate();if(!st||st.left<=0)return;st.running=!st.running;st.last=performance.now();renderTimer()}
+  function resetTimer(){var st=tstate();if(!st)return;st.left=st.total;st.running=false;renderTimer()}
+  function adjustTimer(d){var st=tstate();if(!st)return;st.total=Math.max(60,st.total+d);st.left=Math.min(st.total,Math.max(0,st.left+d));
+    if(st.running)st.last=performance.now();renderTimer()}
+  [].forEach.call(document.querySelectorAll('.tctl button'),function(b){
+    b.addEventListener('click',function(e){e.stopPropagation();var v=b.dataset.t;if(v==='reset')resetTimer();else adjustTimer(+v)});
+  });
+  setInterval(function(){var now=performance.now(),ch=false;
+    Object.keys(timers).forEach(function(k){var st=timers[k];if(st.running){st.left-=(now-st.last)/1000;st.last=now;if(st.left<=0){st.left=0;st.running=false}ch=true}});
+    if(ch)renderTimer()},250);
+  timerEl.addEventListener('click',function(e){e.stopPropagation();if(e.target.closest('#ttime,#tinput'))return;toggleTimer()});
+
+  /* 直接輸入時間：點數字或按 I。可輸入 25（分鐘）、12:30、1.5（分鐘） */
+  var tinput=document.getElementById('tinput'),editing=false,editEnd=0;
+  function parseTime(v){
+    v=String(v).trim().replace(/：/g,':').replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-65248)});
+    var m=v.match(/^(\d{1,3}):(\d{1,2})$/);if(m)return (+m[1])*60+(+m[2]);
+    m=v.match(/^(\d{1,3}(?:\.\d+)?)\s*(分|分鐘|m|min)?$/i);if(m)return Math.round(parseFloat(m[1])*60);
+    m=v.match(/^(\d{1,4})\s*(秒|s|sec)$/i);if(m)return +m[1];
+    return null}
+  function startEdit(){var st=tstate();if(!st)return;editing=true;
+    var l=Math.max(0,Math.ceil(st.left));tinput.value=pad(Math.floor(l/60))+':'+pad(l%60);
+    timerEl.classList.add('editing');tinput.focus();tinput.select()}
+  function endEdit(apply){if(!editing)return;editing=false;editEnd=performance.now();timerEl.classList.remove('editing');
+    var st=tstate(),sec=parseTime(tinput.value);
+    if(apply&&st&&sec!==null&&sec>0){st.total=sec;st.left=sec;st.running=false;renderTimer()}
+    tinput.blur()}
+  ttime.addEventListener('click',function(e){e.stopPropagation();startEdit()});
+  tinput.addEventListener('click',function(e){e.stopPropagation()});
+  tinput.addEventListener('keydown',function(e){e.stopPropagation();
+    if(e.key==='Enter'){e.preventDefault();endEdit(true)}else if(e.key==='Escape'){e.preventDefault();endEdit(false)}});
+  tinput.addEventListener('blur',function(){endEdit(true)});
+
+  /* ---- 操作 ---- */
+  var notes=document.getElementById('notes'),help=document.getElementById('help'),toast=document.getElementById('toast');
+  setTimeout(function(){toast.classList.add('hide')},6000);
+  document.addEventListener('keydown',function(e){
+    var k=e.key;
+    if(['ArrowRight','ArrowDown','PageDown',' ','Enter'].indexOf(k)>-1){e.preventDefault();next()}
+    else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].indexOf(k)>-1){e.preventDefault();prev()}
+    else if(k==='Home'||k==='1'||k==='0')show(0,false,'back');   /* 1 或 0：快速回到第一頁 */
+    else if(k==='End')show(slides.length-1,true,'fwd');
+    else if(k==='n'||k==='N')notes.classList.toggle('show');
+    else if(k==='t'||k==='T')toggleTimer();
+    else if(k==='i'||k==='I'){e.preventDefault();startEdit()}
+    else if(k==='r'||k==='R')resetTimer();
+    else if(k==='+'||k==='=')adjustTimer(60);
+    else if(k==='-'||k==='_')adjustTimer(-60);
+    else if(k==='f'||k==='F'){try{if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen()}catch(err){}}
+    else if(k==='?'||k==='h'||k==='H')help.classList.toggle('show');
+    else if(k==='Escape'){help.classList.remove('show');notes.classList.remove('show')}
+  });
+  document.addEventListener('click',function(e){
+    if(e.target.closest('#notes,#help,#timer,.vgal,#vplayer'))return;
+    if(editing||performance.now()-editEnd<400)return; /* 點旁邊只是結束輸入，不換頁 */
+    if(e.clientX<window.innerWidth*0.2)prev();else next();
+  });
+  help.addEventListener('click',function(){help.classList.remove('show')});
+  var tx=null;
+  document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX},{passive:true});
+  document.addEventListener('touchend',function(e){if(tx===null)return;var dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?next():prev()}tx=null});
+
+  window.addEventListener('load',function(){
+    var start=parseInt((location.hash||'').replace('#',''),10);
+    show(isNaN(start)?0:start-1,false,'fwd');
+  });
+})();
+
+</script>
+<script>
+(function(){
+  /* 黑白像素場（Park 式排法）：
+     整個畫面是一片會流動的點陣（幾團墨＋稀疏的底點），
+     每一頁的文字和圖整塊放在一片乾淨的黑色區域裡，點陣只在這片區域外流動。
+     這片區域依每頁內容的位置自動調整，換頁時會滑動、變形到新位置；
+     邊緣跟著點陣自己的濃淡起伏，不沿著每行字描邊。
+     效能：只算一張小圖（約 170 格寬），每秒更新 20 次，用 CSS 放大成方塊像素 */
+  var cv=document.getElementById('stars'),cx=cv.getContext('2d'),grid=document.getElementById('mist');
+  var CELL=10,GW=0,GH=0,img=null,buf=null,shift=null,streak=null,last=0,acc=0,t=0,glitch=0;
+  var still=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5].map(function(v){return (v+.5)/16});
+  var ON=0xFFCCCCCC,DIM=0xFF9C9C9C;   /* 最亮的點＝K20（#CCCCCC），次亮＝#9C9C9C */
+  /* 墨團：散在整個畫面，緩慢繞行 */
+  var B=[
+    {x:.10,y:.22,ax:.08,ay:.14,fx:.11,fy:.09,p:0,  r:.15},
+    {x:.90,y:.75,ax:.08,ay:.14,fx:.08,fy:.12,p:1.7,r:.12},
+    {x:.78,y:.15,ax:.12,ay:.08,fx:.14,fy:.10,p:3.1,r:.13},
+    {x:.20,y:.85,ax:.12,ay:.08,fx:.09,fy:.15,p:4.4,r:.11},
+    {x:.50,y:.02,ax:.30,ay:.04,fx:.06,fy:.16,p:2.2,r:.11},
+    {x:.50,y:.98,ax:.30,ay:.04,fx:.07,fy:.14,p:5.3,r:.11},
+    {x:.98,y:.42,ax:.03,ay:.22,fx:.12,fy:.07,p:.8, r:.12},
+    {x:.02,y:.55,ax:.03,ay:.22,fx:.10,fy:.11,p:3.9,r:.12},
+    {x:.45,y:.50,ax:.30,ay:.30,fx:.05,fy:.07,p:1.1,r:.12}
+  ];
+  /* 乾淨區：一塊主要的（這頁的文字和圖），加上左上標誌、右上代號、底部控制列三塊小的 */
+  var main={x0:0,y0:0,x1:0,y1:0},mainT=null,small=[];
+
+  function resize(){
+    CELL=Math.max(4,Math.round(window.innerWidth/240));
+    GW=Math.ceil(window.innerWidth/CELL);GH=Math.ceil(window.innerHeight/CELL);
+    cv.width=GW;cv.height=GH;
+    cv.style.width=(GW*CELL)+'px';cv.style.height=(GH*CELL)+'px';
+    if(grid){grid.style.setProperty('--cell',CELL+'px');grid.style.setProperty('--gap',Math.max(1,Math.round(CELL/5))+'px')}
+    img=cx.createImageData(GW,GH);buf=new Uint32Array(img.data.buffer);
+    shift=new Float32Array(GH);streak=new Float32Array(GH);
+    measure(true);
+  }
+
+  function box(r,pad){return {x0:r.left/CELL-pad,y0:r.top/CELL-pad,x1:r.right/CELL+pad,y1:r.bottom/CELL+pad}}
+  function measure(snap){
+    if(!GW)return;
+    var a=document.querySelector('.slide.active'),U=null;
+    if(a)[].slice.call(a.querySelectorAll('h1,h2,h3,p,li,.chip,.glass,.vgal,button,.dak-hero .dk-name,.dak-hero .dk-sub,svg circle,svg ellipse,svg rect,svg path,svg line,svg text,svg polyline,svg use')).forEach(function(e){
+      if(e.closest('.notes,defs,symbol,marker,.glass')&&!e.classList.contains('glass'))return;
+      var r=e.getBoundingClientRect();if(r.width<2||r.height<2)return;
+      if(!U)U={left:r.left,top:r.top,right:r.right,bottom:r.bottom};
+      else{U.left=Math.min(U.left,r.left);U.top=Math.min(U.top,r.top);U.right=Math.max(U.right,r.right);U.bottom=Math.max(U.bottom,r.bottom)}
+    });
+    mainT=U?box(U,10):{x0:GW/2,y0:GH/2,x1:GW/2,y1:GH/2};
+    if(snap)main={x0:mainT.x0,y0:mainT.y0,x1:mainT.x1,y1:mainT.y1};
+    small=[];
+    ['#top .brand','#code','#dock','#toast:not(.hide)'].forEach(function(s){var e=document.querySelector(s);if(!e)return;
+      var r=e.getBoundingClientRect();if(r.width>2)small.push(box(r,3))});
+  }
+
+  /* 圓角矩形的距離（格數；裡面是負的） */
+  function sdBox(px,py,b,rad){
+    var cxm=(b.x0+b.x1)/2,cym=(b.y0+b.y1)/2,hx=Math.max(0,(b.x1-b.x0)/2),hy=Math.max(0,(b.y1-b.y0)/2);
+    rad=Math.min(rad,hx,hy);
+    var qx=Math.abs(px-cxm)-hx+rad,qy=Math.abs(py-cym)-hy+rad;
+    return Math.sqrt(Math.max(qx,0)*Math.max(qx,0)+Math.max(qy,0)*Math.max(qy,0))+Math.min(Math.max(qx,qy),0)-rad;
+  }
+  function ss(e0,e1,v){v=(v-e0)/(e1-e0);v=v<0?0:v>1?1:v;return v*v*(3-2*v)}
+
+  function gain(){var a=document.querySelector('.slide.active');return a&&a.classList.contains('p7')?.6:1}
+
+  function render(){
+    if(mainT){var k=.22;main.x0+=(mainT.x0-main.x0)*k;main.y0+=(mainT.y0-main.y0)*k;main.x1+=(mainT.x1-main.x1)*k;main.y1+=(mainT.y1-main.y1)*k}
+    var asp=GW/GH,i,x,y,k2,b,n=B.length,bx=new Float32Array(n),by=new Float32Array(n),br=new Float32Array(n),g=gain();
+    for(k2=0;k2<n;k2++){b=B[k2];
+      bx[k2]=(b.x+b.ax*Math.sin(t*b.fx*6.2832+b.p))*asp;
+      by[k2]=b.y+b.ay*Math.cos(t*b.fy*6.2832+b.p*1.3);
+      br[k2]=b.r*b.r*(1+.25*Math.sin(t*.5+b.p))}
+    /* 故障條：平常偶爾出現，換頁時大量出現 */
+    var pRow=.003+glitch*.22;
+    for(y=0;y<GH;y++){
+      shift[y]*=.8;streak[y]*=.72;
+      if(Math.random()<pRow){
+        var h=1+(Math.random()*(2+glitch*4)|0),s=(Math.random()-.5)*(8+glitch*60),st=Math.random()<.3+glitch*.6?1:0;
+        for(var j=0;j<h&&y+j<GH;j++){shift[y+j]=s;if(st)streak[y+j]=1}
+      }
+    }
+    var RAD=22,F=8;
+    for(y=0;y<GH;y++){
+      var ny=y/GH,row=y*GW,sy=shift[y],sk=streak[y]>.25,seg=sk?(7+((y*13)%31)):1;
+      var wob=.06*Math.sin(ny*4.7+t*.5)+.02*Math.sin(ny*17-t*1.3);
+      for(x=0;x<GW;x++){
+        i=row+x;
+        /* 乾淨區：主要那塊的邊緣會隨時間起伏，像點陣被推開；小塊固定 */
+        var dm=sdBox(x,y,main,RAD)-(4.2+3.6*Math.sin(x*.135+t*.8)*Math.cos(y*.165-t*.6)+2.2*Math.sin((x-y)*.09+t*1.1));  /* 起伏只往外推，不會吃進文字區 */
+        var z=ss(0,F,dm);
+        if(z<=0){buf[i]=0;continue}
+        for(var q=0;q<small.length;q++){var ds=sdBox(x,y,small[q],5);if(ds<4){z*=ss(0,4,ds)}}
+        if(z<=0){buf[i]=0;continue}
+        var sxp=x-sy;if(sk)sxp=Math.floor(sxp/seg)*seg;
+        var nx=sxp/GH+wob,wy=ny+.05*Math.sin(nx*5.3+t*.45)+.025*Math.sin(nx*13-t*.8),v=0;
+        for(k2=0;k2<n;k2++){var dx=nx-bx[k2],dy=wy-by[k2];v+=br[k2]/(dx*dx+dy*dy+.002)}
+        /* 底點：沒有墨團的地方也有稀疏的點，像 Park 的背景 */
+        var d=(Math.max(0,(v-1.1)*.42)+.09+.07*Math.sin(nx*6+t*.5)*Math.sin(wy*8-t*.4))*z*g;  /* 墨團＋整片稀疏底點 */
+        if(d<=0){buf[i]=0;continue}
+        var th=BAYER[(y&3)*4+(x&3)];
+        buf[i]=d>th?(d>1.4||sk?ON:(d>th+.3?ON:DIM)):0;
+      }
+    }
+    cx.putImageData(img,0,0);
+  }
+
+  function frame(ts){
+    if(document.body.classList.contains('vplaying')){last=0;requestAnimationFrame(frame);return}
+    var dt=last?Math.min(100,ts-last)/1000:0;last=ts;acc+=dt;
+    t+=dt*(1+glitch*4);glitch=Math.max(0,glitch-dt*1.6);
+    if(acc>=.05){acc=0;render()}   /* 每秒 20 格：有數位跳格感，也省效能 */
+    if(!still)requestAnimationFrame(frame);
+  }
+
+  resize();window.addEventListener('resize',resize);
+  setTimeout(function(){measure(false)},6900);   /* 上方操作提示消失後，那塊也還給點陣 */
+  render();requestAnimationFrame(frame);
+
+  document.addEventListener('deck:change',function(e){
+    setTimeout(function(){measure(!!e.detail.first)},e.detail.first?900:560);
+    if(still||e.detail.first)return;glitch=1});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){setTimeout(function(){measure(true)},300)});
+  document.addEventListener('deck:frag',function(){
+    if(still)return;var a=document.querySelector('.slide.active');
+    if(a&&a.classList.contains('p4'))glitch=Math.max(glitch,.5);
+    setTimeout(function(){measure(false)},80);
+  });
+})();
+
+
+(function(){
+  /* 玻璃上的反光跟著滑鼠移動 */
+  var raf=null,mx=0,my=0;
+  document.addEventListener('mousemove',function(e){
+    mx=e.clientX;my=e.clientY;
+    if(raf)return;
+    raf=requestAnimationFrame(function(){
+      raf=null;
+      var els=document.querySelectorAll('.slide.active .glass,#dock');
+      for(var i=0;i<els.length;i++){
+        var el=els[i],r=el.getBoundingClientRect(),k=r.width/(el.offsetWidth||1);
+        el.style.setProperty('--mx',((mx-r.left)/k)+'px');
+        el.style.setProperty('--my',((my-r.top)/k)+'px');
+      }
+    });
+  });
+})();
+
+</script>
+<script>
+(function(){
+  /* W3 情境演出：讀取同步到電腦的雲端資料夾，依上傳順序顯示影片 */
+  var slide=document.querySelector('.vslide');if(!slide)return;
+  var grid=slide.querySelector('.vgrid'),status=slide.querySelector('.vstatus'),
+      btnPick=slide.querySelector('[data-v="pick"]'),btnRe=slide.querySelector('[data-v="reconnect"]'),
+      input=slide.querySelector('.vinput');
+  var GROUPS=5,EXT=/\.(mp4|mov|m4v|webm)$/i,dir=null,saved=null,items=[],timer=null,mode='',scanning=false;
+  function pad(n){return (n<10?'0':'')+n}
+  function fmt(t){t=Math.max(0,Math.floor(t||0));return pad(Math.floor(t/60))+':'+pad(t%60)}
+  function accept(f){return EXT.test(f.name)&&!/^[.~]/.test(f.name)&&f.size>0}
+  function setStatus(html){status.innerHTML=html}
+
+  /* ---- 影片卡 ---- */
+  function makeCard(i){
+    var c=document.createElement('div');c.className='glass vcard';
+    c.innerHTML='<div class="vthumb"><div class="vwait">等待上傳</div><video class="vbg" muted playsinline preload="metadata" aria-hidden="true"></video><video class="vfg" muted playsinline preload="metadata"></video>'+
+      '<div class="vplay"><svg viewBox="0 0 24 24"><path d="M6 4 L20 12 L6 20 Z"/></svg></div>'+
+      '<div class="vbad">此格式無法播放<small></small></div></div>'+
+      '<div class="vmeta"><b>第 '+(i+1)+' 組</b><span></span></div>';
+    var v=c.querySelector('video.vfg'),bg=c.querySelector('video.vbg');
+    v.addEventListener('pause',function(){bg.pause();try{bg.currentTime=v.currentTime}catch(e){}});
+    v.addEventListener('loadedmetadata',function(){
+      c.classList.toggle('portrait',v.videoHeight>v.videoWidth);
+      c.querySelector('.vmeta span').textContent=fmt(v.duration);
+      try{v.currentTime=Math.min(.1,v.duration/2)}catch(e){}
+      if(!v.videoWidth){c.classList.remove('ready');c.classList.add('bad')}
+    });
+    bg.addEventListener('loadedmetadata',function(){try{bg.currentTime=Math.min(.1,bg.duration/2)}catch(e){}});
+    v.addEventListener('error',function(){if(!v.getAttribute('src'))return;c.classList.remove('ready');c.classList.add('bad')});
+    c.addEventListener('mouseenter',function(){if(c.classList.contains('ready'))v.play().catch(function(){})});
+    c.addEventListener('mouseleave',function(){v.pause();try{v.currentTime=bg.currentTime=Math.min(.1,(v.duration||0)/2)}catch(e){}});
+    c.addEventListener('click',function(e){e.stopPropagation();if(items[i]&&c.classList.contains('ready'))openPlayer(i)});
+    return c;
+  }
+  function render(){
+    var n=Math.max(GROUPS,items.length);
+    while(grid.children.length<n)grid.appendChild(makeCard(grid.children.length));
+    while(grid.children.length>n)grid.removeChild(grid.lastChild);
+    for(var i=0;i<n;i++){
+      var c=grid.children[i],it=items[i],v=c.querySelector('video.vfg'),bg=c.querySelector('video.vbg');
+      if(!it){
+        if(v.getAttribute('src')){v.removeAttribute('src');v.load();bg.removeAttribute('src');bg.load()}
+        c.classList.remove('ready','bad','portrait');c.dataset.ver='';c.querySelector('.vmeta span').textContent='';c.querySelector('.vbad small').textContent='';continue;
+      }
+      if(c.dataset.ver!==it.ver){
+        c.dataset.ver=it.ver;c.classList.remove('bad');
+        c.querySelector('.vbad small').textContent=it.name;
+        v.src=it.url;bg.src=it.url;c.classList.add('ready','fresh');
+        setTimeout(function(c){c.classList.remove('fresh')}.bind(null,c),1100);
+      }
+    }
+  }
+  render();
+
+  /* ---- 依上傳順序整理影片 ---- */
+  function clearItems(){items.forEach(function(it){URL.revokeObjectURL(it.url)});items=[]}
+  function merge(files){
+    /* 已排好的影片維持原本位置；新影片依修改時間接在後面 */
+    var byName={};files.forEach(function(f){byName[f.name]=f});
+    items=items.filter(function(it){if(byName[it.name])return true;URL.revokeObjectURL(it.url);return false});
+    items.forEach(function(it){var f=byName[it.name],ver=f.size+'_'+f.lastModified;
+      if(it.ver!==ver){URL.revokeObjectURL(it.url);it.url=URL.createObjectURL(f);it.ver=ver}delete byName[it.name]});
+    Object.keys(byName).map(function(k){return byName[k]}).sort(function(a,b){return a.lastModified-b.lastModified})
+      .forEach(function(f){items.push({name:f.name,ver:f.size+'_'+f.lastModified,url:URL.createObjectURL(f)})});
+    render();
+  }
+
+  /* ---- 讀資料夾（File System Access API，每 3 秒更新） ---- */
+  async function scan(){
+    if(!dir||scanning)return;scanning=true;
+    try{
+      var files=[];
+      for await(var h of dir.values()){
+        if(h.kind!=='file'||!EXT.test(h.name)||/^[.~]/.test(h.name))continue;
+        try{var f=await h.getFile();if(accept(f))files.push(f)}catch(e){}
+      }
+      merge(files);
+      setStatus('<i></i>已連接：'+dir.name+'｜'+items.length+' 支影片｜自動更新中');
+    }catch(e){
+      setStatus('讀取資料夾失敗，請重新選擇');dir=null;stop();showButtons();
+    }
+    scanning=false;
+  }
+  function start(){stop();if(dir&&slide.classList.contains('active')){scan();timer=setInterval(scan,3000)}}
+  function stop(){if(timer){clearInterval(timer);timer=null}}
+
+  /* 記住資料夾（存在瀏覽器的 IndexedDB，下次一鍵重新連接） */
+  function idb(){return new Promise(function(res,rej){var r=indexedDB.open('wazi-deck',1);
+    r.onupgradeneeded=function(){r.result.createObjectStore('kv')};r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}})}
+  async function saveDir(h){try{var db=await idb();db.transaction('kv','readwrite').objectStore('kv').put(h,'videoDir')}catch(e){}}
+  async function loadDir(){try{var db=await idb();return await new Promise(function(res){
+    var q=db.transaction('kv').objectStore('kv').get('videoDir');q.onsuccess=function(){res(q.result||null)};q.onerror=function(){res(null)}})}catch(e){return null}}
+
+  function showButtons(){
+    btnPick.textContent=(dir||mode==='input')?'重新選擇資料夾':'選擇影片資料夾';
+    btnRe.hidden=!(saved&&!dir);
+    if(saved)btnRe.textContent='重新連接「'+saved.name+'」';
+  }
+  async function useDir(h){
+    dir=h;saved=h;mode='api';clearItems();render();saveDir(h);showButtons();
+    setStatus('<i></i>已連接：'+h.name+'｜讀取中…');start();
+  }
+  btnPick.addEventListener('click',async function(e){
+    e.stopPropagation();
+    if(window.showDirectoryPicker){
+      try{await useDir(await window.showDirectoryPicker({id:'wazi-videos',mode:'read'}));return}
+      catch(err){if(err&&err.name==='AbortError')return}
+    }
+    input.click();   /* 瀏覽器不支援資料夾選擇器時，改用選擇檔案 */
+  });
+  btnRe.addEventListener('click',async function(e){
+    e.stopPropagation();if(!saved)return;
+    try{if((await saved.requestPermission({mode:'read'}))==='granted')await useDir(saved)}
+    catch(err){setStatus('無法重新連接，請重新選擇資料夾')}
+  });
+  input.addEventListener('click',function(e){e.stopPropagation()});
+  input.addEventListener('change',function(){
+    var all=[].slice.call(input.files),
+        fs=all.filter(function(f){return accept(f)&&(f.webkitRelativePath||'').split('/').length<=2});
+    dir=null;mode='input';stop();clearItems();merge(fs);
+    var name=all.length?(all[0].webkitRelativePath||'').split('/')[0]:'';
+    setStatus((name?'已讀取：'+name+'｜':'')+items.length+' 支影片｜有新影片時請按「重新選擇資料夾」');
+    showButtons();input.value='';
+  });
+
+  (async function(){
+    if(window.showDirectoryPicker&&window.indexedDB){
+      saved=await loadDir();
+      if(saved){try{if((await saved.queryPermission({mode:'read'}))==='granted'){await useDir(saved);return}}catch(e){}}
+    }
+    showButtons();
+  })();
+
+  /* ---- 放大播放 ---- */
+  var pl=document.getElementById('vplayer'),pv=document.getElementById('vpv'),ptitle=pl.querySelector('.vp-title'),
+      pbar=pl.querySelector('.vp-prog i'),ptime=pl.querySelector('.vp-time'),open=false;
+  function pauseThumbs(){[].forEach.call(grid.querySelectorAll('video'),function(v){v.pause()})}
+  function openPlayer(i){
+    pauseThumbs();
+    ptitle.textContent='第 '+(i+1)+' 組';pv.src=items[i].url;
+    pbar.style.width='0';ptime.textContent='00:00 / 00:00';
+    pl.classList.add('open');pl.setAttribute('aria-hidden','false');open=true;
+    clearTimeout(vpT);vpT=setTimeout(function(){if(open)document.body.classList.add('vplaying')},460);
+    pv.play().catch(function(){});
+  }
+  var vpT=0;
+  function closePlayer(){if(!open)return;open=false;clearTimeout(vpT);document.body.classList.remove('vplaying');pv.pause();pl.classList.remove('open','playing');pl.setAttribute('aria-hidden','true')}
+  function toggle(){if(pv.paused)pv.play().catch(function(){});else pv.pause()}
+  function seek(d){if(pv.duration)pv.currentTime=Math.max(0,Math.min(pv.duration,pv.currentTime+d))}
+  pv.addEventListener('play',function(){pl.classList.add('playing')});
+  pv.addEventListener('pause',function(){pl.classList.remove('playing')});
+  pv.addEventListener('timeupdate',function(){var d=pv.duration||0;pbar.style.width=(d?pv.currentTime/d*100:0)+'%';ptime.textContent=fmt(pv.currentTime)+' / '+fmt(d)});
+  pv.addEventListener('click',function(e){e.stopPropagation();toggle()});
+  pl.querySelector('.vp-play').addEventListener('click',function(e){e.stopPropagation();toggle()});
+  pl.querySelector('.vp-x').addEventListener('click',function(e){e.stopPropagation();closePlayer()});
+  pl.querySelector('.vp-prog').addEventListener('click',function(e){e.stopPropagation();
+    var r=this.getBoundingClientRect();if(pv.duration)pv.currentTime=(e.clientX-r.left)/r.width*pv.duration});
+  pl.addEventListener('click',function(e){e.stopPropagation()});
+
+  /* 播放時先攔下按鍵，簡報不會換頁（F 全螢幕、N 講稿照常） */
+  window.addEventListener('keydown',function(e){
+    if(!open)return;var k=e.key;
+    if(k==='f'||k==='F'||k==='n'||k==='N')return;
+    e.stopImmediatePropagation();e.preventDefault();
+    if(k===' '||k==='k'||k==='K'||k==='Enter')toggle();
+    else if(k==='ArrowRight')seek(5);
+    else if(k==='ArrowLeft')seek(-5);
+    else if(k==='Escape')closePlayer();
+  },true);
+
+  /* 換頁：停在這頁才掃描；離開就停止播放 */
+  document.addEventListener('deck:change',function(){
+    if(slide.classList.contains('active'))start();
+    else{stop();closePlayer();pauseThumbs()}
+  });
+  if(slide.classList.contains('active'))start();
+})();
+</script>
+
+</body>
+</html>
