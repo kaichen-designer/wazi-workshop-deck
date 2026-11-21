@@ -6,7 +6,7 @@
 <title>瓦茲科技 簡報 黑白像素</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 /* =========================================================
    CIS 替換區（銀河玻璃版）
@@ -604,6 +604,26 @@ body.warping #mist{opacity:1}
 /* 時間到：控制列的白框數位式閃爍 */
 #dock:has(#timer.show.done){animation:tdone 1s steps(1,end) infinite}
 @keyframes tdone{50%{box-shadow:0 0 0 3px #F5F5F5;background:#1C1C1C}}
+
+/* 封面：照活動海報的字體與資訊（細黑體英文標題、細字中文資訊、白色標誌方塊） */
+.cover{justify-content:flex-start;gap:0;padding:110px 160px 96px}
+.cv-logo{width:150px;height:150px;background:#F5F5F5;display:grid;place-items:center;color:#050505}
+.cv-logo svg{width:84px;height:84px}
+.cv-title{margin:96px 0 0;font-family:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;font-weight:200;
+  font-size:150px;line-height:1;letter-spacing:-.015em;color:#F5F5F5}
+.cv-title span{display:block;margin-top:18px;font-size:82px;letter-spacing:-.005em}
+.cv-info{margin-top:auto;display:flex;flex-direction:column;gap:14px}
+.cv-info p{margin:0;font-family:"Inter","Noto Sans TC","Microsoft JhengHei",sans-serif;font-weight:300;font-size:36px;letter-spacing:.02em;color:#F5F5F5}
+.cv-org{margin:44px 0 0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-weight:300;font-size:22px;letter-spacing:.06em;color:var(--sub)}
+/* 封面不顯示上方標誌列和下方控制列（標誌已在封面上） */
+#top,#dock{transition:opacity .4s ease}
+body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0;pointer-events:none}
+
+/* 字重：跟封面一致 —— 大標題細體 300，反白強調 500，卡片和圖例小標 500，內文維持 400 */
+:root{--title-w:300}
+.t1,.t2,.t3,.t4{font-weight:300}
+.grad{font-weight:500}
+.spec .t,.p7 .who b,.vmeta b{font-weight:500}
 </style>
 </head>
 <body class="theme-galaxy-glass">
@@ -653,6 +673,22 @@ body.warping #mist{opacity:1}
 
   <!-- ============ 老闆第一段 ============ -->
 
+  <!-- ============ 封面（照活動海報） ============ -->
+  <section class="slide cover" data-code="00" data-speaker="主持人">
+    <div class="cv-logo in" style="--d:.05"><svg aria-label="瓦茲科技"><use href="#logo"/></svg></div>
+    <h1 class="cv-title in" style="--d:.2">CO－CREATION<span>WORKSHOP</span></h1>
+    <div class="cv-info in" style="--d:.45">
+      <p>活動日期｜2026 年 11 月 27 日（週五）</p>
+      <p>報到時間｜09：00 － 09：10（活動將於 09：10 開始）</p>
+      <p>活動地點｜T2－308</p>
+    </div>
+    <p class="cv-org in" style="--d:.6">瓦茲科技｜設計部</p>
+    <aside class="notes">
+      <p>（開場前）大家入座時先停在這頁，畫面上有日期、報到時間和地點。</p>
+      <p>09：10 準時開始，按 → 進入第一頁。</p>
+    </aside>
+  </section>
+
   <section class="slide center" data-code="P1" data-speaker="執行長">
     <p class="eyebrow in" style="--d:.1">瓦茲科技</p>
     <h1 class="t1 in" style="--d:.3">專注於<br><span class="grad">真正熱愛的生活</span></h1>
@@ -684,10 +720,10 @@ body.warping #mist{opacity:1}
 
   <!-- ============ 工作坊：關係 ============ -->
 
-  <section class="slide" data-code="W1" data-speaker="主持人" data-timer="480" data-sheet="學習單 第一頁">
+  <section class="slide" data-code="W1" data-speaker="主持人" data-timer="480" data-sheet="手冊 第一頁">
     <div class="cols l">
       <div class="stack">
-        <p class="eyebrow in" style="--d:.1">學習單・第一頁</p>
+        <p class="eyebrow in" style="--d:.1">手冊・第一頁</p>
         <h2 class="t3 in" style="--d:.2">想想你與他人<br>平常如何<span class="grad">相處</span>。</h2>
         <p class="lead in" style="--d:.35">你帶給對方什麼？對方又帶給你什麼？</p>
         <ol class="list num in" style="--d:.5">
@@ -718,12 +754,12 @@ body.warping #mist{opacity:1}
       </svg>
     </div>
     <aside class="notes">
-      <p>「請翻到學習單第一頁。</p>
+      <p>「請翻到手冊第一頁。</p>
       <p>想想你和身邊的人平常是怎麼相處的。在圓圈裡寫下一個對象，不一定要是人，寵物、植物、一個地方都可以。至少寫一個，虛線的圓圈可以視情況再多寫。</p>
       <p>然後沿著箭頭，寫下你們之間的交流。從你指出去的箭頭是 A，我付出：你帶給對方什麼？指向你的箭頭是 B，我得到：對方帶給你什麼？</p>
       <p>箭頭上可以寫具體的事，例如幫忙做什麼、給了什麼東西；也可以寫抽象的感受，例如安心、被理解。兩邊不需要一樣多，照實際情況寫就好，沒有標準答案。」</p>
       <p>（計時 8 分鐘：按 T 開始）</p>
-      <p>（寫完）「謝謝大家。請把學習單留在手邊，等一下會用到。接下來，請瓦茲科技的執行長再跟大家說幾句話。」</p>
+      <p>（寫完）「謝謝大家。請把手冊留在手邊，等一下會用到。接下來，請瓦茲科技的執行長再跟大家說幾句話。」</p>
     </aside>
   </section>
 
@@ -888,15 +924,15 @@ body.warping #mist{opacity:1}
 
   <!-- ============ 工作坊：設計 ============ -->
 
-  <section class="slide" data-code="W2" data-speaker="主持人" data-timer="1500" data-sheet="學習單 第二頁">
-    <p class="eyebrow in" style="--d:.1">學習單・第二頁</p>
+  <section class="slide" data-code="W2" data-speaker="主持人" data-timer="1500" data-sheet="手冊 第二頁">
+    <p class="eyebrow in" style="--d:.1">手冊・第二頁</p>
     <h2 class="t3 in" style="--d:.2">創造一個新的<span class="grad">社交角色</span></h2>
     <div class="cols">
       <div class="stack in" style="--d:.35">
         <div class="pair"><span class="chip a">A</span><span class="body">你願意或希望為它做些什麼？</span></div>
         <div class="pair"><span class="chip b">B</span><span class="body">它會帶給你什麼？</span></div>
         <ul class="list" style="margin-top:14px">
-          <li>依照說明書的步驟和情境製作</li>
+          <li>依照手冊的步驟和情境製作</li>
         </ul>
       </div>
       <svg class="diagram in" style="--d:.5;width:100%" viewBox="0 0 700 320" aria-label="自己與 AI 機器人">
@@ -913,17 +949,17 @@ body.warping #mist{opacity:1}
       </svg>
     </div>
     <aside class="notes">
-      <p>「請翻到學習單第二頁。</p>
+      <p>「請翻到手冊第二頁。</p>
       <p>剛剛執行長說，想請大家設計一台你願意與它建立某種關係的機器人。我們要把它想成一個新的社交角色，一個會加入你生活的新成員。</p>
       <p>中間的箭頭和第一頁一樣有 A 和 B：A 是你願意或希望為它做些什麼？B 是它會帶給你什麼？</p>
-      <p>請依照說明書的步驟和情境來製作。」</p>
+      <p>請依照手冊的步驟和情境來製作。」</p>
     </aside>
   </section>
 
   <section class="slide vslide" data-code="W3" data-speaker="主持人">
     <p class="eyebrow in" style="--d:.1">小組</p>
     <h2 class="t3 in" style="--d:.2">把你們的機器人<span class="grad">演出來</span></h2>
-    <p class="lead in" style="--d:.3">每組選一個情境演出</p>
+    <p class="lead in" style="--d:.3">每組抽一個情境演出</p>
     <div class="vgal in" style="--d:.45">
       <div class="vgrid"></div>
       <div class="vbar">
@@ -934,7 +970,7 @@ body.warping #mist{opacity:1}
       <input type="file" class="vinput" webkitdirectory multiple hidden>
     </div>
     <aside class="notes">
-      <p>「接下來，請每組選一個情境，把你們的機器人演出來。演的時候請一位組員用手機錄下來，錄好之後上傳到雲端資料夾。上傳完成的影片，會依上傳順序出現在畫面上。」</p>
+      <p>「接下來，請每組抽一個情境，把你們的機器人演出來。演的時候請一位組員用手機錄下來，錄好之後上傳到雲端資料夾。上傳完成的影片，會依上傳順序出現在畫面上。」</p>
       <p>（操作）第一次進這頁先點「選擇影片資料夾」，選 G: 槽裡的影片資料夾。之後每 3 秒會自動抓新影片。</p>
       <p>（播放）點影片卡放大播放。空白鍵播放／暫停，← → 倒退／快轉 5 秒，Esc 關閉。播放時按鍵不會換頁。</p>
       <p>（事前準備）資料夾在 G: 槽按右鍵選「離線使用」；iPhone 錄影前把「設定 → 相機 → 格式」改成「最相容」。</p>
@@ -1241,10 +1277,12 @@ body.warping #mist{opacity:1}
   function box(r,pad){return {x0:r.left/CELL-pad,y0:r.top/CELL-pad,x1:r.right/CELL+pad,y1:r.bottom/CELL+pad}}
   function measure(snap){
     if(!GW)return;
-    var a=document.querySelector('.slide.active'),U=null;
-    if(a)[].slice.call(a.querySelectorAll('h1,h2,h3,p,li,.chip,.glass,.vgal,button,.dak-hero .dk-name,.dak-hero .dk-sub,svg circle,svg ellipse,svg rect,svg path,svg line,svg text,svg polyline,svg use')).forEach(function(e){
+    var a=document.querySelector('.slide.active'),U=null,rng=document.createRange();
+    if(a)[].slice.call(a.querySelectorAll('.cv-logo,h1,h2,h3,p,li,.chip,.glass,.vgal,button,.dak-hero .dk-name,.dak-hero .dk-sub,svg circle,svg ellipse,svg rect,svg path,svg line,svg text,svg polyline,svg use')).forEach(function(e){
       if(e.closest('.notes,defs,symbol,marker,.glass')&&!e.classList.contains('glass'))return;
-      var r=e.getBoundingClientRect();if(r.width<2||r.height<2)return;
+      /* 文字只量字實際佔到的寬度（段落本身是整行寬，會把整個畫面都算成文字區） */
+      var r=/^(H1|H2|H3|P|LI)$/.test(e.tagName)?textRect(e,rng):e.getBoundingClientRect();if(!r)return;
+      if(r.width<2||r.height<2)return;
       if(!U)U={left:r.left,top:r.top,right:r.right,bottom:r.bottom};
       else{U.left=Math.min(U.left,r.left);U.top=Math.min(U.top,r.top);U.right=Math.max(U.right,r.right);U.bottom=Math.max(U.bottom,r.bottom)}
     });
@@ -1252,9 +1290,22 @@ body.warping #mist{opacity:1}
     if(snap)main={x0:mainT.x0,y0:mainT.y0,x1:mainT.x1,y1:mainT.y1};
     small=[];
     ['#top .brand','#code','#dock','#toast:not(.hide)'].forEach(function(s){var e=document.querySelector(s);if(!e)return;
+      if(a&&a.classList.contains('cover')&&s!=='#toast:not(.hide)')return;   /* 封面隱藏了標誌列和控制列 */
       var r=e.getBoundingClientRect();if(r.width>2)small.push(box(r,3))});
   }
 
+  /* 一段文字裡每個字串實際佔的範圍合起來（不含區塊本身多出來的空白寬度） */
+  function textRect(e,rng){
+    var w=document.createTreeWalker(e,NodeFilter.SHOW_TEXT),n,R=null;
+    while((n=w.nextNode())){
+      if(!n.nodeValue.trim())continue;
+      rng.selectNodeContents(n);var r=rng.getBoundingClientRect();if(r.width<1)continue;
+      if(!R)R={left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:1,height:1};
+      else{R.left=Math.min(R.left,r.left);R.top=Math.min(R.top,r.top);R.right=Math.max(R.right,r.right);R.bottom=Math.max(R.bottom,r.bottom)}
+    }
+    if(R){R.width=R.right-R.left;R.height=R.bottom-R.top}
+    return R;
+  }
   /* 圓角矩形的距離（格數；裡面是負的） */
   function sdBox(px,py,b,rad){
     var cxm=(b.x0+b.x1)/2,cym=(b.y0+b.y1)/2,hx=Math.max(0,(b.x1-b.x0)/2),hy=Math.max(0,(b.y1-b.y0)/2);
