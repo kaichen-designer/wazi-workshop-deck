@@ -126,7 +126,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-s
 #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center;transform:translate(-50%,-50%) scale(.5);z-index:2}
 
 /* 上方資訊 */
-#top{position:absolute;left:140px;right:140px;top:64px;display:flex;justify-content:space-between;align-items:center;z-index:5;font-size:20px;color:var(--sub);letter-spacing:.06em}
+#top{position:absolute;left:160px;right:160px;top:64px;display:flex;justify-content:space-between;align-items:center;z-index:5;font-size:20px;color:var(--sub);letter-spacing:.06em}
 .brand{display:flex;align-items:center;gap:14px;color:var(--fg);font-weight:600;font-size:22px;letter-spacing:.22em}
 .brand svg{width:30px;height:30px}
 #code{font-variant-numeric:tabular-nums}
@@ -200,6 +200,10 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-s
 .chip.a{color:var(--a);background:color-mix(in srgb,var(--a) 15%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--a) 55%,transparent)}
 .chip.b{color:var(--b);background:color-mix(in srgb,var(--b) 15%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--b) 55%,transparent)}
 .pair{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+/* W2：A、B 標籤同寬，後面的字對齊；下方圓點對準標籤中心，文字對齊 A、B 的字 */
+.slide[data-code="W2"] .pair .chip{width:64px;padding:6px 0;justify-content:center}
+.slide[data-code="W2"] .list li{gap:48px}
+.slide[data-code="W2"] .list li::before{margin-left:26px}
 .sheet{font-size:22px;letter-spacing:.14em;color:var(--sub)}
 
 /* 規格卡 */
@@ -394,7 +398,9 @@ body:has(.slide.active.p7) #nebula{opacity:.3}
 .vbad{display:none;position:absolute;inset:0;padding:14px;flex-direction:column;justify-content:center;gap:6px;text-align:center;font-size:18px;color:var(--alert);line-height:1.4}
 .vbad small{color:var(--sub);font-size:15px;word-break:break-all}
 .vcard.bad .vbad{display:flex}
-.vmeta{display:flex;align-items:baseline;justify-content:space-between;padding:0 6px}
+.vmeta{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;padding:0 6px}
+.vcount{flex-basis:100%;margin-top:4px;font-style:normal;font-size:17px;color:var(--sub)}
+.vcount:empty{display:none}
 .vmeta b{font-size:30px;font-weight:700}
 .vmeta span{font-size:20px;color:var(--sub);font-variant-numeric:tabular-nums}
 .vcard.fresh .vthumb{animation:vfresh 1s cubic-bezier(.16,1,.3,1)}
@@ -430,7 +436,7 @@ body.vplaying #stars,body.vplaying #fog,body.vplaying #mist,body.vplaying #nebul
 
 /* P5：達克的三項能力小動畫 */
 .p5 .spec{justify-content:flex-start;gap:18px;min-height:0}
-.p5 .spec .t{font-size:42px;line-height:1.3}
+.p5 .spec .t{font-size:42px;line-height:1.3;min-height:2.6em}   /* 標題都留兩行高，三張卡的說明文字才會對齊 */
 .spec .d{font-size:26px;line-height:1.55;color:var(--sub)}
 .scene{width:100%;height:170px;display:block;overflow:visible}
 .sc-line{stroke:var(--hair);stroke-width:2}
@@ -610,8 +616,9 @@ body.warping #mist{opacity:1}
 .cv-logo{width:150px;height:150px;background:#F5F5F5;display:grid;place-items:center;color:#050505}
 .cv-logo svg{width:84px;height:84px}
 .cv-title{margin:96px 0 0;font-family:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;font-weight:200;
-  font-size:150px;line-height:1;letter-spacing:-.015em;color:#F5F5F5}
-.cv-title span{display:block;margin-top:18px;font-size:82px;letter-spacing:-.005em}
+  font-size:150px;line-height:1;letter-spacing:-.015em;color:#F5F5F5;
+  text-indent:-.06em}   /* 「C」字形左邊自帶約 9px 空白，往左補回，和標誌方塊、下方資訊的左緣對齊 */
+.cv-title span{display:block;margin-top:18px;font-size:82px;letter-spacing:-.005em;text-indent:0}
 .cv-info{margin-top:auto;display:flex;flex-direction:column;gap:14px}
 .cv-info p{margin:0;font-family:"Inter","Noto Sans TC","Microsoft JhengHei",sans-serif;font-weight:300;font-size:36px;letter-spacing:.02em;color:#F5F5F5}
 .cv-org{margin:44px 0 0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-weight:300;font-size:22px;letter-spacing:.06em;color:var(--sub)}
@@ -622,7 +629,7 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
 /* 字重：跟封面一致 —— 大標題細體 300，反白強調 500，卡片和圖例小標 500，內文維持 400 */
 :root{--title-w:300}
 .t1,.t2,.t3,.t4{font-weight:300}
-.grad{font-weight:500}
+.grad{font-weight:inherit}
 .spec .t,.p7 .who b,.vmeta b{font-weight:500}
 </style>
 </head>
@@ -678,8 +685,8 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
     <div class="cv-logo in" style="--d:.05"><svg aria-label="瓦茲科技"><use href="#logo"/></svg></div>
     <h1 class="cv-title in" style="--d:.2">CO－CREATION<span>WORKSHOP</span></h1>
     <div class="cv-info in" style="--d:.45">
-      <p>活動日期｜2026 年 11 月 27 日（週五）</p>
-      <p>報到時間｜09：00 － 09：10（活動將於 09：10 開始）</p>
+      <p>活動日期｜11 月 27 日（週五）</p>
+      <p>報到時間｜09：00 － 09：10</p>
       <p>活動地點｜T2－308</p>
     </div>
     <p class="cv-org in" style="--d:.6">瓦茲科技｜研發部</p>
@@ -691,10 +698,10 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
 
   <section class="slide center" data-code="P1" data-speaker="執行長">
     <p class="eyebrow in" style="--d:.1">瓦茲科技</p>
-    <h1 class="t1 in" style="--d:.3">專注於<br><span class="grad">真正熱愛的生活</span></h1>
+    <h1 class="t1 in" style="--d:.3">用科技讓人專注於<br><span class="grad">真正熱愛的生活</span></h1>
     <aside class="notes">
       <p>「歡迎各位來到瓦茲科技。</p>
-      <p>我們的理念是：專注於真正熱愛的生活。</p>
+      <p>我們的理念是：用科技讓人專注於真正熱愛的生活。</p>
       <p>我們相信，每個人的時間和心力都很珍貴，應該留給自己真正在乎的人和事。所以這些年來，我們一直透過科技，把生活中繁瑣的事情接過來，讓大家能專心在熱愛的部分。」</p>
     </aside>
   </section>
@@ -720,7 +727,7 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
 
   <!-- ============ 工作坊：關係 ============ -->
 
-  <section class="slide" data-code="W1" data-speaker="主持人" data-timer="480" data-sheet="手冊 第一頁">
+  <section class="slide" data-code="W1" data-speaker="主持人" data-timer="600" data-sheet="手冊 第一頁">
     <div class="cols l">
       <div class="stack">
         <p class="eyebrow in" style="--d:.1">手冊・第一頁</p>
@@ -758,7 +765,7 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
       <p>想想你和身邊的人平常是怎麼相處的。在圓圈裡寫下一個對象，不一定要是人，寵物、植物、一個地方都可以。至少寫一個，虛線的圓圈可以視情況再多寫。</p>
       <p>然後沿著箭頭，寫下你們之間的交流。從你指出去的箭頭是 A，我付出：你帶給對方什麼？指向你的箭頭是 B，我得到：對方帶給你什麼？</p>
       <p>箭頭上可以寫具體的事，例如幫忙做什麼、給了什麼東西；也可以寫抽象的感受，例如安心、被理解。兩邊不需要一樣多，照實際情況寫就好，沒有標準答案。」</p>
-      <p>（計時 8 分鐘：按 T 開始）</p>
+      <p>（計時 10 分鐘：按 T 開始）</p>
       <p>（寫完）「謝謝大家。請把手冊留在手邊，等一下會用到。接下來，請瓦茲科技的執行長再跟大家說幾句話。」</p>
     </aside>
   </section>
@@ -845,7 +852,7 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
           <rect x="112" y="166" width="190" height="6" rx="3" style="fill:var(--hair)"/>
           <rect class="s3-prog" x="112" y="166" width="190" height="6" rx="3" fill="url(#gRing)"/>
         </svg>
-        <div class="stack" style="gap:12px"><span class="t">獨立完成過去需要人類處理的工作</span><span class="d">家事、帳單、照顧家人，不需要任何人插手</span></div>
+        <div class="stack" style="gap:12px"><span class="t">獨立完成過去<br>需要人類處理的工作</span><span class="d">家事、帳單、照顧家人，不需要任何人插手</span></div>
       </div>
     </div>
     <aside class="notes">
@@ -970,10 +977,10 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
       <input type="file" class="vinput" webkitdirectory multiple hidden>
     </div>
     <aside class="notes">
-      <p>「接下來，請每組抽一個情境，把你們的機器人演出來。演的時候請一位組員用手機錄下來，錄好之後上傳到雲端資料夾。上傳完成的影片，會依上傳順序出現在畫面上。」</p>
-      <p>（操作）第一次進這頁先點「選擇影片資料夾」，選 G: 槽裡的影片資料夾。之後每 3 秒會自動抓新影片。</p>
+      <p>「接下來，請每組抽一個情境，把你們的機器人演出來。演的時候請一位組員用手機錄下來，錄好之後上傳到雲端資料夾裡你們這組的資料夾。上傳完成的影片，會出現在畫面上你們組別的位置。」</p>
+      <p>（操作）第一次進這頁先點「選擇影片資料夾」，選 G: 槽裡的影片資料夾（裡面有「第1組」「第2組」…子資料夾的那一層）。之後每 3 秒會自動抓新影片。同一組有好幾支時播最新的；直接放在外層的影片會排在最後，標成「未分組」。</p>
       <p>（播放）點影片卡放大播放。空白鍵播放／暫停，← → 倒退／快轉 5 秒，Esc 關閉。播放時按鍵不會換頁。</p>
-      <p>（事前準備）資料夾在 G: 槽按右鍵選「離線使用」；iPhone 錄影前把「設定 → 相機 → 格式」改成「最相容」。</p>
+      <p>（事前準備）資料夾在 G: 槽按右鍵選「離線使用」。工作坊開始前雙擊「影片轉檔小幫手.bat」並讓視窗開著：iPhone、Android 直接上傳的影片（包含 HEVC、HDR、MOV、3GP、MKV）會自動轉成這台電腦能播的 MP4，卡片會先顯示「轉檔中」，轉好就能播。</p>
     </aside>
   </section>
 
@@ -1403,15 +1410,30 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
 </script>
 <script>
 (function(){
-  /* W3 情境演出：讀取同步到電腦的雲端資料夾，依上傳順序顯示影片 */
+  /* W3 情境演出：讀取同步到電腦的雲端資料夾，依各組子資料夾顯示影片 */
   var slide=document.querySelector('.vslide');if(!slide)return;
   var grid=slide.querySelector('.vgrid'),status=slide.querySelector('.vstatus'),
       btnPick=slide.querySelector('[data-v="pick"]'),btnRe=slide.querySelector('[data-v="reconnect"]'),
       input=slide.querySelector('.vinput');
-  var GROUPS=5,EXT=/\.(mp4|mov|m4v|webm)$/i,dir=null,saved=null,items=[],timer=null,mode='',scanning=false;
+  var GROUPS=5,EXT=/\.(mp4|mov|m4v|webm|3gp|3g2|mkv|avi|hevc)$/i,dir=null,saved=null,items=[],timer=null,mode='',scanning=false;
+  /* 轉檔小幫手會把 Chrome 播不了的影片（例如 iPhone 預設的 HEVC、HDR）轉成一般 MP4，放在這個子資料夾 */
+  var CONV='_播放用',conv={},hasConv=false;
+  function base(n){return n.replace(/\.[^.]+$/,'').toLowerCase()}
+  /* 每組一個子資料夾（例如「第1組」「第 2 組」「第三組」「Group 4」），卡片照組別放；
+     同一組有好幾支時播最新的那支。直接放在主資料夾的影片列在最後，標成「未分組」 */
+  var looseOrder=[],labels=[];
+  function groupNum(name){
+    if(/^[._~]/.test(name)||name===CONV)return 0;
+    if(!/組|组|group|team|^\s*[gt]?\s*\d+\s*$/i.test(name))return 0;
+    var m=name.match(/\d+/);if(m)return +m[0]<=30?+m[0]:0;
+    var c=name.match(/[一二三四五六七八九十]+/);if(!c)return 0;
+    var d='一二三四五六七八九',s=c[0],i=s.indexOf('十');
+    if(i<0)return d.indexOf(s)+1;
+    return (i?d.indexOf(s[0])+1:1)*10+(s[i+1]?d.indexOf(s[i+1])+1:0);
+  }
   function pad(n){return (n<10?'0':'')+n}
   function fmt(t){t=Math.max(0,Math.floor(t||0));return pad(Math.floor(t/60))+':'+pad(t%60)}
-  function accept(f){return EXT.test(f.name)&&!/^[.~]/.test(f.name)&&f.size>0}
+  function accept(f){return EXT.test(f.name)&&!/^[.~]/.test(f.name)&&!/\.part\./i.test(f.name)&&f.size>0}
   function setStatus(html){status.innerHTML=html}
 
   /* ---- 影片卡 ---- */
@@ -1419,8 +1441,8 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
     var c=document.createElement('div');c.className='glass vcard';
     c.innerHTML='<div class="vthumb"><div class="vwait">等待上傳</div><video class="vbg" muted playsinline preload="metadata" aria-hidden="true"></video><video class="vfg" muted playsinline preload="metadata"></video>'+
       '<div class="vplay"><svg viewBox="0 0 24 24"><path d="M6 4 L20 12 L6 20 Z"/></svg></div>'+
-      '<div class="vbad">此格式無法播放<small></small></div></div>'+
-      '<div class="vmeta"><b>第 '+(i+1)+' 組</b><span></span></div>';
+      '<div class="vbad"><span class="vbad-t">此格式無法播放</span><small></small></div></div>'+
+      '<div class="vmeta"><b>第 '+(i+1)+' 組</b><span></span><em class="vcount"></em></div>';
     var v=c.querySelector('video.vfg'),bg=c.querySelector('video.vbg');
     v.addEventListener('pause',function(){bg.pause();try{bg.currentTime=v.currentTime}catch(e){}});
     v.addEventListener('loadedmetadata',function(){
@@ -1437,18 +1459,21 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
     return c;
   }
   function render(){
-    var n=Math.max(GROUPS,items.length);
+    var n=Math.max(GROUPS,items.length,labels.length);
     while(grid.children.length<n)grid.appendChild(makeCard(grid.children.length));
     while(grid.children.length>n)grid.removeChild(grid.lastChild);
     for(var i=0;i<n;i++){
       var c=grid.children[i],it=items[i],v=c.querySelector('video.vfg'),bg=c.querySelector('video.vbg');
+      c.querySelector('.vmeta b').textContent=labels[i]||('第 '+(i+1)+' 組');
+      c.querySelector('.vcount').textContent=(it&&it.count>1)?'共 '+it.count+' 支，播放最新':'';
       if(!it){
         if(v.getAttribute('src')){v.removeAttribute('src');v.load();bg.removeAttribute('src');bg.load()}
         c.classList.remove('ready','bad','portrait');c.dataset.ver='';c.querySelector('.vmeta span').textContent='';c.querySelector('.vbad small').textContent='';continue;
       }
       if(c.dataset.ver!==it.ver){
         c.dataset.ver=it.ver;c.classList.remove('bad');
-        c.querySelector('.vbad small').textContent=it.name;
+        c.querySelector('.vbad-t').textContent=(hasConv&&!it.isConv)?'轉檔中，請稍候…':'此格式無法播放';
+        c.querySelector('.vbad small').textContent=it.name+((hasConv||it.isConv)?'':'｜請開啟「影片轉檔小幫手」');
         v.src=it.url;bg.src=it.url;c.classList.add('ready','fresh');
         setTimeout(function(c){c.classList.remove('fresh')}.bind(null,c),1100);
       }
@@ -1456,30 +1481,73 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
   }
   render();
 
-  /* ---- 依上傳順序整理影片 ---- */
-  function clearItems(){items.forEach(function(it){URL.revokeObjectURL(it.url)});items=[]}
-  function merge(files){
-    /* 已排好的影片維持原本位置；新影片依修改時間接在後面 */
-    var byName={};files.forEach(function(f){byName[f.name]=f});
-    items=items.filter(function(it){if(byName[it.name])return true;URL.revokeObjectURL(it.url);return false});
-    items.forEach(function(it){var f=byName[it.name],ver=f.size+'_'+f.lastModified;
-      if(it.ver!==ver){URL.revokeObjectURL(it.url);it.url=URL.createObjectURL(f);it.ver=ver}delete byName[it.name]});
-    Object.keys(byName).map(function(k){return byName[k]}).sort(function(a,b){return a.lastModified-b.lastModified})
-      .forEach(function(f){items.push({name:f.name,ver:f.size+'_'+f.lastModified,url:URL.createObjectURL(f)})});
+  /* ---- 依組別整理影片 ---- */
+  function clearItems(){items.forEach(function(it){if(it)URL.revokeObjectURL(it.url)});items=[];looseOrder=[];labels=[]}
+  function count(){return items.filter(Boolean).length}
+  /* groups：{組別: [{f:檔案, folder:子資料夾名稱}]}；loose：直接放在主資料夾的影片 */
+  function merge(groups,loose){
+    var gn=0;Object.keys(groups).forEach(function(k){gn=Math.max(gn,+k)});
+    if(gn)gn=Math.max(GROUPS,gn);
+    var want=[];labels=[];
+    for(var g=1;g<=gn;g++){
+      labels[g-1]='第 '+g+' 組';
+      var list=groups[g]||[];if(!list.length)continue;
+      list.sort(function(a,b){return b.f.lastModified-a.f.lastModified});   /* 同組播最新的 */
+      want[g-1]={e:list[0],count:list.length};
+    }
+    /* 主資料夾裡的影片：已排好的維持原本位置，新影片依修改時間接在後面 */
+    var byName={};loose.forEach(function(f){byName[f.name]=f});
+    looseOrder=looseOrder.filter(function(n){return byName[n]});
+    loose.filter(function(f){return looseOrder.indexOf(f.name)<0}).sort(function(a,b){return a.lastModified-b.lastModified})
+      .forEach(function(f){looseOrder.push(f.name)});
+    looseOrder.forEach(function(n,j){var s=gn+j;labels[s]=gn?'未分組':'第 '+(s+1)+' 組';want[s]={e:{f:byName[n],folder:''},count:1}});
+    /* 有轉好的版本就改播轉好的 */
+    for(var i=0,n=Math.max(items.length,want.length);i<n;i++){
+      var w=want[i],it=items[i];
+      if(!w){if(it)URL.revokeObjectURL(it.url);items[i]=null;continue}
+      var cv=conv[(w.e.folder?w.e.folder+'/':'')+base(w.e.f.name)],src=cv||w.e.f,
+          ver=w.e.folder+'/'+w.e.f.name+'_'+(cv?'c':'o')+'_'+src.size+'_'+src.lastModified+'_'+(hasConv?1:0);
+      if(it&&it.ver===ver){it.count=w.count;continue}
+      if(it)URL.revokeObjectURL(it.url);
+      items[i]={name:w.e.f.name,ver:ver,isConv:!!cv,count:w.count,url:URL.createObjectURL(src)};
+    }
+    items.length=want.length;
     render();
+    return gn;
   }
 
   /* ---- 讀資料夾（File System Access API，每 3 秒更新） ---- */
   async function scan(){
     if(!dir||scanning)return;scanning=true;
     try{
-      var files=[];
+      var groups={},loose=[];
       for await(var h of dir.values()){
+        if(h.kind==='directory'){
+          var g=groupNum(h.name);if(!g)continue;
+          groups[g]=groups[g]||[];
+          for await(var gh of h.values()){
+            if(gh.kind!=='file'||!EXT.test(gh.name)||/^[.~]/.test(gh.name))continue;
+            try{var gf=await gh.getFile();if(accept(gf))groups[g].push({f:gf,folder:h.name})}catch(e){}
+          }
+          continue;
+        }
         if(h.kind!=='file'||!EXT.test(h.name)||/^[.~]/.test(h.name))continue;
-        try{var f=await h.getFile();if(accept(f))files.push(f)}catch(e){}
+        try{var f=await h.getFile();if(accept(f))loose.push(f)}catch(e){}
       }
-      merge(files);
-      setStatus('<i></i>已連接：'+dir.name+'｜'+items.length+' 支影片｜自動更新中');
+      conv={};hasConv=false;
+      async function addConv(ch,pre){
+        if(ch.kind!=='file'||!/\.mp4$/i.test(ch.name)||/\.part\./i.test(ch.name))return;
+        try{var cf=await ch.getFile();if(cf.size>0)conv[pre+base(cf.name)]=cf}catch(e){}
+      }
+      try{
+        var sub=await dir.getDirectoryHandle(CONV);hasConv=true;
+        for await(var ch of sub.values()){
+          if(ch.kind==='directory'){for await(var ch2 of ch.values())await addConv(ch2,ch.name+'/');continue}
+          await addConv(ch,'');
+        }
+      }catch(e){}
+      var gn=merge(groups,loose);
+      setStatus('<i></i>已連接：'+dir.name+'｜'+(gn?Object.keys(groups).length+' 個組別資料夾｜':'')+count()+' 支影片｜自動更新中'+(hasConv?'｜轉檔小幫手已啟用':''));
     }catch(e){
       setStatus('讀取資料夾失敗，請重新選擇');dir=null;stop();showButtons();
     }
@@ -1519,11 +1587,19 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
   });
   input.addEventListener('click',function(e){e.stopPropagation()});
   input.addEventListener('change',function(){
-    var all=[].slice.call(input.files),
-        fs=all.filter(function(f){return accept(f)&&(f.webkitRelativePath||'').split('/').length<=2});
-    dir=null;mode='input';stop();clearItems();merge(fs);
+    var all=[].slice.call(input.files),groups={},loose=[];
+    conv={};hasConv=false;
+    all.forEach(function(f){var p=(f.webkitRelativePath||'').split('/');
+      if(p.length<=2){if(accept(f))loose.push(f);return}
+      if(p[1]===CONV){hasConv=true;
+        if(/\.mp4$/i.test(f.name)&&!/\.part\./i.test(f.name)&&f.size>0){if(p.length===3)conv[base(f.name)]=f;else if(p.length===4)conv[p[2]+'/'+base(f.name)]=f}
+        return}
+      var g=p.length===3&&groupNum(p[1]);
+      if(g){groups[g]=groups[g]||[];if(accept(f))groups[g].push({f:f,folder:p[1]})}
+    });
+    dir=null;mode='input';stop();clearItems();merge(groups,loose);
     var name=all.length?(all[0].webkitRelativePath||'').split('/')[0]:'';
-    setStatus((name?'已讀取：'+name+'｜':'')+items.length+' 支影片｜有新影片時請按「重新選擇資料夾」');
+    setStatus((name?'已讀取：'+name+'｜':'')+count()+' 支影片｜有新影片時請按「重新選擇資料夾」');
     showButtons();input.value='';
   });
 
@@ -1541,7 +1617,7 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
   function pauseThumbs(){[].forEach.call(grid.querySelectorAll('video'),function(v){v.pause()})}
   function openPlayer(i){
     pauseThumbs();
-    ptitle.textContent='第 '+(i+1)+' 組';pv.src=items[i].url;
+    ptitle.textContent=labels[i]||('第 '+(i+1)+' 組');pv.src=items[i].url;
     pbar.style.width='0';ptime.textContent='00:00 / 00:00';
     pl.classList.add('open');pl.setAttribute('aria-hidden','false');open=true;
     clearTimeout(vpT);vpT=setTimeout(function(){if(open)document.body.classList.add('vplaying')},460);
