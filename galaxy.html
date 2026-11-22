@@ -126,6 +126,9 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-s
 #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center;transform:translate(-50%,-50%) scale(.5);z-index:2}
 
 /* 上方資訊 */
+/* 點簡報時不出現打字用的游標（I 形滑鼠、閃爍的直線），也不會反白選到字；只有計時輸入框例外 */
+html,body{cursor:default;-webkit-user-select:none;user-select:none;caret-color:transparent}
+input,textarea{-webkit-user-select:text;user-select:text;caret-color:auto}
 #top{position:absolute;left:160px;right:160px;top:64px;display:flex;justify-content:space-between;align-items:center;z-index:5;font-size:20px;color:var(--sub);letter-spacing:.06em}
 .brand{display:flex;align-items:center;gap:14px;color:var(--fg);font-weight:600;font-size:22px;letter-spacing:.22em}
 .brand svg{width:30px;height:30px}
@@ -157,6 +160,18 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-s
 #timer:hover .tctl{opacity:1}
 .tctl button{font:inherit;font-size:15px;color:var(--fg);background:var(--hair);border:0;border-radius:999px;padding:6px 13px;cursor:pointer}
 .tctl button:hover,.tctl button:focus-visible{background:var(--fg);color:var(--bg);outline:none}
+/* 背景音樂開關：只在有計時的頁面出現；播放中四條像素音量條會跳動，靜音時變暗 */
+#music{display:none;align-items:flex-end;gap:4px;height:30px;padding:0 0 0 22px;margin-left:-4px;border:0;border-left:1px solid var(--hair);
+  background:none;color:var(--fg);cursor:pointer;opacity:.5;transition:opacity .3s}
+#dock:has(#timer.show) #music{display:flex}
+#music i{display:block;width:5px;height:6px;background:currentColor}
+body.music-on #music{opacity:1}
+body.music-on #music i{animation:mbar 1.2s steps(4,end) infinite}
+body.music-on #music i:nth-child(2){animation-delay:-.45s;animation-duration:1s}
+body.music-on #music i:nth-child(3){animation-delay:-.8s;animation-duration:1.4s}
+body.music-on #music i:nth-child(4){animation-delay:-.2s;animation-duration:.9s}
+body.music-muted #music{opacity:.28}
+@keyframes mbar{0%,100%{height:6px}50%{height:26px}}
 
 /* 投影片 */
 .slide{position:absolute;inset:0;padding:180px 160px 200px;display:flex;flex-direction:column;justify-content:center;gap:44px;opacity:0;visibility:hidden;pointer-events:none}
@@ -879,6 +894,7 @@ body.vplaying #stars,body.vplaying #fog,body.vplaying #mist,body.vplaying #nebul
         <button type="button" data-t="reset" title="從頭開始（R）"><svg class="ico" viewBox="0 0 24 24"><path d="M4.5 12 A7.5 7.5 0 1 0 7 6.4 M4 3 V8 H9"/></svg></button>
       </div>
     </div>
+    <button type="button" id="music" title="背景音樂開／關（M）：計時中才會播放" aria-label="背景音樂開關"><i></i><i></i><i></i><i></i></button>
   </nav>
 </div>
 
@@ -890,6 +906,7 @@ body.vplaying #stars,body.vplaying #fog,body.vplaying #mist,body.vplaying #nebul
   <div><kbd>T</kbd>計時開始／暫停　<kbd>R</kbd>從頭開始</div>
   <div><kbd>+</kbd><kbd>-</kbd>計時加減 1 分鐘（也可以點計時器旁的按鈕）</div>
   <div><kbd>I</kbd>直接輸入時間（或點計時器上的數字），例如 25、12:30</div>
+  <div><kbd>M</kbd>背景音樂開／關（計時中才會播放，暫停或時間到會自動淡出）</div>
   <div>影片播放時：<kbd>空白鍵</kbd>播放／暫停　<kbd>←</kbd><kbd>→</kbd>倒退／快轉 5 秒　<kbd>Esc</kbd>關閉</div>
   <div><kbd>F</kbd>全螢幕</div>
   <div><kbd>1</kbd><kbd>0</kbd>快速回到第一頁</div>
@@ -1027,8 +1044,10 @@ body.vplaying #stars,body.vplaying #fog,body.vplaying #mist,body.vplaying #nebul
   ring.style.strokeDasharray=C;
   function tstate(){var t=+slides[cur].dataset.timer||0;if(!t)return null;
     if(!timers[cur])timers[cur]={total:t,left:t,running:false,last:0};return timers[cur]}
+  /* 通知背景音樂：這頁有沒有計時、是否計時中 */
+  function emitTimer(st){document.dispatchEvent(new CustomEvent('deck:timer',{detail:{has:!!st,running:!!(st&&st.running&&st.left>0),left:st?st.left:0,code:slides[cur].dataset.code}}))}
   function renderTimer(){
-    var st=tstate();timerEl.classList.toggle('show',!!st);
+    var st=tstate();timerEl.classList.toggle('show',!!st);emitTimer(st);
     if(!st){timerEl.classList.remove('done');return}   /* 沒有計時的頁面：不閃 */
     var l=Math.max(0,Math.ceil(st.left));
     ttime.textContent=pad(Math.floor(l/60))+':'+pad(l%60);
@@ -1083,6 +1102,7 @@ body.vplaying #stars,body.vplaying #fog,body.vplaying #mist,body.vplaying #nebul
     else if(k==='t'||k==='T')toggleTimer();
     else if(k==='i'||k==='I'){e.preventDefault();startEdit()}
     else if(k==='r'||k==='R')resetTimer();
+    else if(k==='m'||k==='M')document.dispatchEvent(new CustomEvent('deck:music-toggle'));
     else if(k==='+'||k==='=')adjustTimer(60);
     else if(k==='-'||k==='_')adjustTimer(-60);
     else if(k==='f'||k==='F'){try{if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen()}catch(err){}}
@@ -1090,7 +1110,7 @@ body.vplaying #stars,body.vplaying #fog,body.vplaying #mist,body.vplaying #nebul
     else if(k==='Escape'){help.classList.remove('show');notes.classList.remove('show')}
   });
   document.addEventListener('click',function(e){
-    if(e.target.closest('#notes,#help,#timer,.vgal,#vplayer'))return;
+    if(e.target.closest('#notes,#help,#timer,#music,.vgal,#vplayer'))return;
     if(editing||performance.now()-editEnd<400)return; /* 點旁邊只是結束輸入，不換頁 */
     if(e.clientX<window.innerWidth*0.2)prev();else next();
   });
@@ -1212,6 +1232,139 @@ body.vplaying #stars,body.vplaying #fog,body.vplaying #mist,body.vplaying #nebul
 })();
 
 </script>
+<!-- MUSIC:START 發想背景音樂（來源：scratchpad music_engine.js + music_ctl.js） -->
+<script>
+/* 發想時的背景音樂：用 Web Audio 即時合成，不需要音樂檔、不用網路，也沒有版權問題
+   輕鬆、乾淨的電子聲音，配合簡報的黑白像素風格：
+   柔和的長音、像音樂盒一樣的分解和弦、一顆顆亮起的訊號音（像像素點），沒有雜訊。
+   WaziMusic.play('calm' | 'focus')：3 秒淡入；WaziMusic.stop(秒)：淡出後暫停
+   calm  = W1 回想自己的關係：D 大調，輕快的流行和弦進行，音樂盒般的分解和弦，帶一點搖擺
+   focus = W2 設計機器人：F 大調，低低的脈衝往前推，訊號音分解和弦 */
+window.WaziMusic=(function(){
+  var AC=window.AudioContext||window.webkitAudioContext;
+  var ctx=null,master,dry,verb,echo,padBus,arpBus,an;
+  var playing=false,mood='calm',sched=null,next=0,step=0,stopT=0,vol=.22,chordIdx=0,mel=3,held=[];
+  var MOODS={
+    calm:{bpm:80,chordSteps:32,swing:.32,pad:.016,bass:.06,
+      pulseEvery:8,pulseVol:.045,pulseAcc:.06,
+      arpProb:.6,arpVol:.034,arpTone:'box',arp:[0,1,2,3,2,1,3,2],
+      melProb:.2,melVol:.034,tick:0,
+      chords:[[38,50,57,64,66,69],[49,52,57,61,64,69],[47,54,59,62,66,69],[43,55,59,62,66,69]],   /* D  A/C♯  Bm7  Gmaj9 */
+      scale:[69,71,74,76,78,81,83,86]},
+    focus:{bpm:84,chordSteps:64,swing:.14,pad:.018,bass:.06,
+      pulseEvery:4,pulseVol:.07,pulseAcc:.095,
+      arpProb:.55,arpVol:.03,arpTone:'bell',arp:[0,2,1,3,0,3,2,1],
+      melProb:.1,melVol:.032,tick:.009,
+      chords:[[41,53,60,64,67,69],[41,53,60,64,67,71],[45,57,60,64,67,71],[38,50,57,60,64,65]],   /* Fmaj9  F(♯11)  Am9  Dm9 */
+      scale:[72,74,77,79,81,84,86,89]}
+  };
+  function f(m){return 440*Math.pow(2,(m-69)/12)}
+  function gain(v){var g=ctx.createGain();g.gain.value=v;return g}
+  function impulse(sec){var n=Math.floor(ctx.sampleRate*sec),b=ctx.createBuffer(2,n,ctx.sampleRate);
+    for(var c=0;c<2;c++){var d=b.getChannelData(c);for(var i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3.2)}return b}
+  function init(){
+    ctx=new AC();
+    master=gain(0);
+    var comp=ctx.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=3;comp.attack.value=.02;comp.release.value=.35;
+    var makeup=gain(8);master.connect(makeup);makeup.connect(comp);comp.connect(ctx.destination);   /* 各聲部都很輕，整體補回到筆電喇叭聽得清楚的音量 */
+    an=ctx.createAnalyser();an.fftSize=256;an.smoothingTimeConstant=.82;comp.connect(an);
+    dry=gain(.8);dry.connect(master);
+    verb=ctx.createConvolver();verb.buffer=impulse(3);var wet=gain(.38);verb.connect(wet);wet.connect(master);
+    /* 回音：3 個十六分音符的延遲，越回越暗 */
+    echo=ctx.createDelay(2);var fb=gain(.3),elp=ctx.createBiquadFilter();elp.type='lowpass';elp.frequency.value=3000;
+    echo.connect(elp);elp.connect(fb);fb.connect(echo);var eo=gain(.42);elp.connect(eo);eo.connect(master);
+    /* 長音：慢慢開合的低通，聲音像在呼吸 */
+    var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1300;lp.Q.value=.5;
+    var lfo=ctx.createOscillator(),lg=gain(400);lfo.frequency.value=.05;lfo.connect(lg);lg.connect(lp.frequency);lfo.start();
+    padBus=gain(1);padBus.connect(lp);lp.connect(dry);var pv=gain(.6);lp.connect(pv);pv.connect(verb);
+    /* 分解和弦 */
+    var alp=ctx.createBiquadFilter();alp.type='lowpass';alp.frequency.value=3200;
+    arpBus=gain(1);arpBus.connect(alp);alp.connect(dry);var av=gain(.5);alp.connect(av);av.connect(verb);var ae=gain(.35);alp.connect(ae);ae.connect(echo);
+  }
+  /* ---- 聲音（都是乾淨的波形，沒有雜訊） ---- */
+  function env(g,t,a,att,hold,rel){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+att);g.gain.setValueAtTime(a,t+att+hold);g.gain.linearRampToValueAtTime(0,t+att+hold+rel)}
+  function pad(m,t,d,a){
+    [['triangle',-5],['sine',5]].forEach(function(v){var o=ctx.createOscillator(),g=ctx.createGain();
+      o.type=v[0];o.frequency.value=f(m);o.detune.value=v[1];env(g,t,a,1.8,Math.max(.5,d-1.8),2.6);
+      o.connect(g);g.connect(padBus);o.start(t);o.stop(t+d+2.8);held.push({o:o,g:g,end:t+d+2.8})})}
+  function bass(m,t,d,a){var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=f(m);
+    env(g,t,a,.6,Math.max(.5,d-.6),1.4);o.connect(g);g.connect(dry);o.start(t);o.stop(t+d+2.1);held.push({o:o,g:g,end:t+d+2.1})}
+  function releaseHeld(sec){var now=ctx.currentTime;
+    held.forEach(function(h){if(h.end<=now)return;try{h.g.gain.cancelScheduledValues(now);h.g.gain.setValueAtTime(h.g.gain.value,now);
+      h.g.gain.linearRampToValueAtTime(0,now+sec);h.o.stop(now+sec+.05)}catch(e){}});held=[]}
+  /* 音樂盒：正弦波＋一點高八度，短短的叮 */
+  function box(m,t,a){[[1,1],[2,.22],[3,.06]].forEach(function(p){var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=f(m)*p[0];
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a*p[1],t+.005);g.gain.exponentialRampToValueAtTime(.0004,t+(p[0]===1?.9:.35));
+    o.connect(g);g.connect(arpBus);o.start(t);o.stop(t+1)})}
+  /* 訊號音：很短、很亮的叮（像一顆像素亮起），後面跟著回音 */
+  function bell(m,t,a){var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=f(m);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.004);g.gain.exponentialRampToValueAtTime(.0004,t+.3);
+    o.connect(g);g.connect(arpBus);var e=gain(.5);g.connect(e);e.connect(echo);o.start(t);o.stop(t+.35)}
+  /* 低脈衝：悶悶的、圓圓的低音，像心跳一樣往前推 */
+  function pulse(m,t,a){var o=ctx.createOscillator(),g=ctx.createGain(),l=ctx.createBiquadFilter();o.type='triangle';o.frequency.value=f(m);
+    l.type='lowpass';l.frequency.setValueAtTime(1100,t);l.frequency.exponentialRampToValueAtTime(240,t+.18);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.008);g.gain.exponentialRampToValueAtTime(.0004,t+.3);
+    o.connect(l);l.connect(g);g.connect(dry);o.start(t);o.stop(t+.32)}
+  /* 輕輕的「答」：高音正弦波 20 毫秒，取代沙沙的鼓聲 */
+  function tick(t,a){var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=2600;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.002);g.gain.exponentialRampToValueAtTime(.0002,t+.025);
+    o.connect(g);g.connect(dry);o.start(t);o.stop(t+.04)}
+  /* ---- 排程：以十六分音符為格子，每 0.25 秒往後排 1.5 秒；反拍稍微延後，聽起來比較放鬆 ---- */
+  function schedule(){
+    if(!playing)return;var M=MOODS[mood],sd=60/M.bpm/4,ahead=ctx.currentTime+1.5;
+    held=held.filter(function(h){return h.end>ctx.currentTime});
+    echo.delayTime.setValueAtTime(sd*3,ctx.currentTime);
+    while(next<ahead){
+      var t=next,s=step%M.chordSteps,ch=M.chords[chordIdx%M.chords.length],ts=t+(step%4===2?sd*M.swing*2:0),i;
+      if(s===0){var d=M.chordSteps*sd;bass(ch[0],t,d,M.bass);for(i=1;i<ch.length;i++)pad(ch[i],t,d,M.pad)}
+      if(step%M.pulseEvery===0)pulse(ch[0]+12,t,step%16===0?M.pulseAcc:M.pulseVol);
+      if(step%2===0&&Math.random()<M.arpProb){var n=ch[2+M.arp[(step/2)%8]%4]+12,a=(step%8===0?1.25:1)*M.arpVol;
+        if(M.arpTone==='box')box(n,ts,a);else bell(n,ts,a)}
+      if(step%2===0&&Math.random()<M.melProb){   /* 旋律：在音階上一步一步走，不亂跳 */
+        mel=Math.max(0,Math.min(M.scale.length-1,mel+[-2,-1,-1,1,1,2][Math.floor(Math.random()*6)]));
+        bell(M.scale[mel]+(M.arpTone==='box'?0:0),ts+.002,M.melVol)}
+      if(M.tick&&step%4===2&&Math.random()<.75)tick(ts,M.tick);
+      step++;next+=sd;if(step%M.chordSteps===0)chordIdx++;
+    }
+  }
+  function ramp(v,s){var g=master.gain,now=ctx.currentTime;g.cancelScheduledValues(now);g.setValueAtTime(g.value,now);g.linearRampToValueAtTime(v,now+s)}
+  function play(m){
+    if(!AC)return false;if(!ctx)init();if(ctx.state!=='running')ctx.resume();clearTimeout(stopT);
+    if(m&&MOODS[m]&&m!==mood){mood=m;if(playing){releaseHeld(2);step=0;chordIdx=0;next=Math.max(next,ctx.currentTime+.5)}}
+    if(!playing){playing=true;next=ctx.currentTime+.1;step=0;chordIdx=0;schedule();sched=setInterval(schedule,250)}
+    ramp(vol,3);return true}
+  function stop(fade){
+    if(!ctx||!playing)return;fade=fade==null?1.5:fade;ramp(0,fade);clearTimeout(stopT);
+    stopT=setTimeout(function(){playing=false;clearInterval(sched);sched=null;ctx.suspend()},fade*1000+300)}
+  function setVolume(v){vol=v;if(ctx&&playing)ramp(v,.3)}
+  return {play:play,stop:stop,setVolume:setVolume,isPlaying:function(){return playing},mood:function(){return mood},analyser:function(){return an}};
+})();
+
+(function(){
+  /* 背景音樂跟著計時器走：W1、W2 計時中才播放；按 T 暫停、換頁會淡出，時間到時 4 秒淡出。
+     按 M 或點下方控制列的音量條可以靜音（重新開簡報會恢復有聲音） */
+  if(!window.WaziMusic)return;
+  var btn=document.getElementById('music'),muted=false,want=false,mood='calm',timeUp=false,lastKey='';
+  function update(){
+    var on=want&&!muted;
+    document.body.classList.toggle('music-on',on);
+    if(on)WaziMusic.play(mood);else WaziMusic.stop(timeUp?4:1.5);
+  }
+  document.addEventListener('deck:timer',function(e){
+    var d=e.detail,w=!!(d.has&&d.running),m=d.code==='W2'?'focus':'calm',key=w+'|'+m;
+    if(key===lastKey)return;lastKey=key;
+    timeUp=!!(d.has&&d.left<=0);want=w;mood=m;update();
+  });
+  function toggle(){
+    muted=!muted;document.body.classList.toggle('music-muted',muted);
+    if(btn)btn.title=muted?'背景音樂已靜音（按 M 打開）':'背景音樂開／關（M）：計時中才會播放';
+    update();
+  }
+  document.addEventListener('deck:music-toggle',toggle);
+  if(btn)btn.addEventListener('click',function(e){e.stopPropagation();toggle()});
+})();
+</script>
+<!-- MUSIC:END -->
 <script>
 (function(){
   /* W3 情境演出：讀取同步到電腦的雲端資料夾，依各組子資料夾顯示影片 */
