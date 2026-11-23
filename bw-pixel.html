@@ -215,10 +215,60 @@ body.music-muted #music{opacity:.28}
 .chip.a{color:var(--a);background:color-mix(in srgb,var(--a) 15%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--a) 55%,transparent)}
 .chip.b{color:var(--b);background:color-mix(in srgb,var(--b) 15%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--b) 55%,transparent)}
 .pair{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
-/* W2：A、B 標籤同寬，後面的字對齊；下方圓點對準標籤中心，文字對齊 A、B 的字 */
-.slide[data-code="W2"] .pair .chip{width:64px;padding:6px 0;justify-content:center}
-.slide[data-code="W2"] .list li{gap:48px}
-.slide[data-code="W2"] .list li::before{margin-left:26px}
+/* 手冊 #02–#04 */
+.hb{justify-content:flex-start;gap:40px;padding-top:150px}
+.hb-head{display:grid;grid-template-columns:1fr 260px;gap:80px;align-items:start}
+.hb-head .stack{gap:20px}
+/* 手冊配置圖：照手冊的版面，三欄（虛線）、#02/#04 和 #03/授權之間的分隔線、從「我」拉到 #03 的雙箭頭；目前這一區反白 */
+.hbmap{width:260px;height:150px;overflow:visible;margin-top:8px;opacity:.85}   /* 小小的位置提示，不搶標題 */
+.hbmap .blk{fill:transparent}
+.hbmap .blk.on{fill:var(--fg)}
+.hbmap .sheet{fill:none;stroke:var(--sub);stroke-width:1.5}
+.hbmap .div{fill:none;stroke:var(--sub);stroke-width:1.5}
+.hbmap .div.dash{stroke-dasharray:5 6}
+.hbmap .ln{fill:none;stroke:var(--sub);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.hbmap .obj{fill:none;stroke:var(--sub);stroke-width:1.2;opacity:.55}
+.hbmap .me{fill:var(--bg);stroke:var(--fg);stroke-width:1.6}
+.hbmap .lbl{font-family:var(--mono,var(--font));font-size:24px;font-weight:600;fill:var(--sub);letter-spacing:.06em}
+.hbmap .lbl.on{fill:var(--bg)}
+/* #02：兩欄照手冊，(2) 是有底色的那一欄；A、B 箭頭從「自己」穿過兩欄到 AI 機器人 */
+.hb2{position:relative;height:380px;display:grid;grid-template-columns:1fr 1fr;gap:28px;padding:0 170px}
+.hb2-col{display:flex;flex-direction:column;gap:14px;padding:34px 40px}
+.hb2-col b{font-size:34px;font-weight:600}
+.hb2-col span{font-size:26px;line-height:1.5;color:var(--sub)}
+.hb2-col.fill{background:color-mix(in srgb,var(--fg) 9%,var(--bg))}
+.hb2-lines{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.hb2-lbl{font-size:26px;font-weight:600;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:var(--bg);stroke-width:10px;stroke-linejoin:round}
+.hb2-lbl.a{fill:var(--a)}
+.hb2-lbl.b{fill:var(--b)}
+/* #03：步驟＋規格標籤 */
+.hb3{grid-template-columns:5fr 6fr;gap:90px;align-items:start}
+.li-sub{display:block;font-size:28px;color:var(--sub);margin-top:6px}
+.tagcard{display:flex;flex-direction:column;gap:22px;padding:34px 44px 40px}
+.tagcard .tag{align-self:flex-start;background:var(--fg);color:var(--bg);font-size:24px;font-weight:600;padding:4px 14px;letter-spacing:.08em}
+.tagcard .tr{display:flex;align-items:baseline;gap:16px;font-size:32px}
+.tagcard .tr b{font-weight:500;white-space:nowrap}
+.tagcard .tr b small{font-size:22px;color:var(--sub);font-weight:400}
+.tagcard .tr i{flex:1;min-width:60px;border-bottom:2px dotted var(--sub);transform:translateY(-6px)}
+/* 成果授權：照手冊的文字和簽名欄 */
+.auth{display:flex;flex-direction:column;gap:48px;padding:44px 54px 50px}
+.auth p{margin:0;font-size:32px;line-height:1.75}
+.auth-sign{display:grid;grid-template-columns:1fr 1fr;gap:70px}
+.auth .tr{display:flex;align-items:baseline;gap:16px;font-size:30px}
+.auth .tr b{font-weight:500;white-space:nowrap}
+.auth .tr b small{font-size:22px;color:var(--sub);font-weight:400}
+.auth .tr i{flex:1;min-width:50px;border-bottom:2px dotted var(--sub);transform:translateY(-6px)}
+.auth .tr.date i{flex:1 1 60px}
+/* #04：三張步驟卡 */
+.hb4 .spec{justify-content:flex-start;gap:18px;min-height:0;padding:30px 36px 36px}
+.hb4 .spec .stack{gap:10px}
+.hb4 .spec .t{font-size:36px;line-height:1.3;min-height:2.6em}
+.hb4 .spec .d{font-size:24px;line-height:1.5;color:var(--sub)}
+.hbicon{width:160px;height:90px;fill:none;stroke:var(--fg);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.hbicon .f{fill:var(--fg)}
+.hbicon .thin{stroke-width:2;opacity:.6}
+.hbicon text{fill:var(--bg);stroke:none;font-size:30px;font-weight:700;text-anchor:middle;font-family:var(--font)}
+.hbicon text.s{fill:var(--fg);font-size:18px;font-family:var(--mono,var(--font));font-weight:500}
 .sheet{font-size:22px;letter-spacing:.14em;color:var(--sub)}
 
 /* 規格卡 */
@@ -953,39 +1003,107 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
 
   <!-- ============ 工作坊：設計 ============ -->
 
-  <section class="slide" data-code="W2" data-speaker="主持人" data-timer="1500" data-sheet="手冊 第二頁">
-    <p class="eyebrow in" style="--d:.1">手冊・第二頁</p>
-    <h2 class="t3 in" style="--d:.2">創造一個新的<span class="grad">社交角色</span></h2>
-    <div class="cols">
-      <div class="stack in" style="--d:.35">
-        <div class="pair"><span class="chip a">A</span><span class="body">你願意或希望為它做些什麼？</span></div>
-        <div class="pair"><span class="chip b">B</span><span class="body">它會帶給你什麼？</span></div>
-        <ul class="list" style="margin-top:14px">
-          <li>依照手冊的步驟和情境製作</li>
-        </ul>
+  <!-- 手冊 #02–#04：每頁右上角是整張手冊的區塊配置圖（照手冊的虛線、分隔線和箭頭），目前這一區反白 -->
+  <section class="slide hb" data-code="W2" data-speaker="主持人" data-timer="480" data-sheet="手冊 #02">
+    <div class="hb-head">
+      <div class="stack">
+        <p class="eyebrow in" style="--d:.1">手冊・#02</p>
+        <h2 class="t3 in" style="--d:.2">創造一個新的<span class="grad">社交角色</span></h2>
+        <p class="lead in" style="--d:.3">它會帶給你什麼？而你願意或希望為它做些什麼？</p>
       </div>
-      <svg class="diagram in" style="--d:.5;width:100%" viewBox="0 0 700 320" aria-label="自己與 AI 機器人">
-        <path id="w5a" class="arrow a" d="M200 128 H500" marker-end="url(#mA)"/>
-        <path id="w5b" class="arrow b" d="M500 192 H200" marker-end="url(#mB)"/>
-        <circle class="dot a" r="6"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath xlink:href="#w5a"/></animateMotion></circle>
-        <circle class="dot b" r="6"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite"><mpath xlink:href="#w5b"/></animateMotion></circle>
-        <circle class="node self" cx="112" cy="160" r="72"/>
-        <circle class="node" cx="588" cy="160" r="72"/>
-        <text class="dlabel a" x="350" y="94">(A)</text>
-        <text class="dlabel b" x="350" y="228">(B)</text>
-        <text class="ntext dark" x="112" y="160">自己</text>
-        <text class="ntext s" x="588" y="160">AI 機器人</text>
+      <svg class="hbmap in" style="--d:.35" data-on="2" viewBox="0 0 400 230" role="img" aria-label="手冊區塊配置：目前在 #02"></svg>
+    </div>
+    <div class="hb2 in" style="--d:.5">
+      <div class="glass panel hb2-col"><b>(1) 描述想建立來往的互動</b><span>從 #01 的關係裡，挑出你想要的互動元素</span></div>
+      <div class="glass panel hb2-col fill"><b>(2) 轉化成機器人具體特質</b><span>把互動組成新角色的能力、個性和樣子</span></div>
+      <svg class="hb2-lines" viewBox="0 0 1600 380" aria-label="自己與 AI 機器人之間的 A、B 箭頭">
+        <path id="hb2a" class="arrow a" d="M150 250 H1440" marker-end="url(#mA)"/>
+        <path id="hb2b" class="arrow b" d="M1450 290 H160" marker-end="url(#mB)"/>
+        <circle class="dot a" r="6"><animateMotion dur="3.2s" repeatCount="indefinite"><mpath xlink:href="#hb2a"/></animateMotion></circle>
+        <circle class="dot b" r="6"><animateMotion dur="3.2s" begin="1.6s" repeatCount="indefinite"><mpath xlink:href="#hb2b"/></animateMotion></circle>
+        <circle class="node self" cx="72" cy="270" r="66"/>
+        <circle class="node" cx="1528" cy="270" r="66"/>
+        <text class="ntext dark" x="72" y="270">自己</text>
+        <text class="ntext s" x="1528" y="270">AI 機器人</text>
+        <text class="hb2-lbl a" x="800" y="222">(A) 你願意或希望為它做些什麼</text>
+        <text class="hb2-lbl b" x="800" y="332">(B) 它會帶給你什麼</text>
       </svg>
     </div>
     <aside class="notes">
-      <p>「請翻到手冊第二頁。</p>
+      <p>「請看手冊的 #02。</p>
       <p>剛剛執行長說，想請大家設計一台你願意與它建立某種關係的機器人。我們要把它想成一個新的社交角色，一個會加入你生活的新成員。</p>
-      <p>中間的箭頭和第一頁一樣有 A 和 B：A 是你願意或希望為它做些什麼？B 是它會帶給你什麼？</p>
-      <p>請依照手冊的步驟和情境來製作。」</p>
+      <p>先在 (1) 寫下你想和它建立哪些來往，可以從 #01 的關係裡挑出你想要的互動；再在 (2) 把這些互動轉化成機器人具體的特質。</p>
+      <p>中間的箭頭和 #01 一樣有 A 和 B：A 是你願意或希望為它做些什麼？B 是它會帶給你什麼？」</p>
+      <p>（計時 8 分鐘：按 T 開始）</p>
     </aside>
   </section>
 
-  <section class="slide vslide" data-code="W3" data-speaker="主持人">
+  <section class="slide hb" data-code="W3" data-speaker="主持人" data-timer="900" data-sheet="手冊 #03">
+    <div class="hb-head">
+      <div class="stack">
+        <p class="eyebrow in" style="--d:.1">手冊・#03</p>
+        <h2 class="t3 in" style="--d:.2">畫出<span class="grad">他／她／它／牠</span></h2>
+        <p class="lead in" style="--d:.3">把你的機器人畫出來，再填上規格標籤</p>
+      </div>
+      <svg class="hbmap in" style="--d:.35" data-on="3" viewBox="0 0 400 230" role="img" aria-label="手冊區塊配置：目前在 #03"></svg>
+    </div>
+    <div class="cols hb3">
+      <ol class="list num in" style="--d:.45">
+        <li>畫出你的機器人</li>
+        <li>填上規格標籤</li>
+        <li><span>交流<small class="li-sub">與小組成員分享你的機器人</small></span></li>
+      </ol>
+      <div class="glass panel tagcard in" style="--d:.55">
+        <span class="tag">規格標籤</span>
+        <div class="tr"><b>名字</b><i></i></div>
+        <div class="tr"><b>高度</b><i></i><b>重量</b><i></i></div>
+        <div class="tr"><b>性能<small>（記憶體容量、續航、移動…）</small></b><i></i></div>
+        <div class="tr"><b>核心功能</b><i></i></div>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>「請看手冊的 #03。把你剛剛設計的機器人畫出來，他、她、它或牠都可以，不用畫得很好，看得出特色就好。</p>
+      <p>畫完之後填上規格標籤：名字、高度、重量、性能，例如記憶體容量、續航、怎麼移動，還有它的核心功能。</p>
+      <p>最後花幾分鐘和小組成員分享你的機器人。」</p>
+      <p>（計時 15 分鐘：按 T 開始）</p>
+    </aside>
+  </section>
+
+  <section class="slide hb" data-code="W4" data-speaker="主持人" data-timer="600" data-sheet="手冊 #04">
+    <div class="hb-head">
+      <div class="stack">
+        <p class="eyebrow in" style="--d:.1">手冊・#04｜小組</p>
+        <h2 class="t3 in" style="--d:.2">如何<span class="grad">互動</span>？</h2>
+        <p class="lead in" style="--d:.3">請與小組共創，抽一個情境並演出機器人們的互動</p>
+      </div>
+      <svg class="hbmap in" style="--d:.35" data-on="4" viewBox="0 0 400 230" role="img" aria-label="手冊區塊配置：目前在 #04"></svg>
+    </div>
+    <div class="specs hb4">
+      <div class="glass panel spec in" style="--d:.5">
+        <span class="i">01</span>
+        <svg class="hbicon" viewBox="0 0 160 90" aria-hidden="true"><rect x="38" y="10" width="54" height="72" rx="5" transform="rotate(-10 65 46)"/><rect x="66" y="8" width="54" height="72" rx="5" class="f"/><text x="93" y="52">?</text></svg>
+        <div class="stack"><span class="t">一組抽一張情境卡</span><span class="d">決定你們要演出的情境</span></div>
+      </div>
+      <div class="glass panel spec in" style="--d:.75">
+        <span class="i">02</span>
+        <svg class="hbicon" viewBox="0 0 160 90" aria-hidden="true"><circle cx="48" cy="22" r="11"/><path d="M48 33 V62 M34 44 H62 M48 62 L38 84 M48 62 L58 84"/><circle cx="102" cy="48" r="7"/><path d="M102 55 V72 M93 62 H111 M102 72 L96 84 M102 72 L108 84"/><path class="thin" d="M130 6 V84 M126 6 H134 M126 45 H134 M126 84 H134"/></svg>
+        <div class="stack"><span class="t">畫出適當比例的角色</span><span class="d">把大家的機器人放進同一個場景</span></div>
+      </div>
+      <div class="glass panel spec in" style="--d:1">
+        <span class="i">03</span>
+        <svg class="hbicon" viewBox="0 0 160 90" aria-hidden="true"><rect x="22" y="22" width="86" height="56" rx="6"/><path d="M108 40 L136 26 V74 L108 60 Z"/><circle cx="42" cy="50" r="7" class="f"/><text x="74" y="56" class="s">REC</text></svg>
+        <div class="stack"><span class="t">共同討論、演出角色在情境中的互動</span><span class="d">並準備 30 秒到 1 分鐘的錄影片段</span></div>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>「請看手冊的 #04，接下來是小組時間。</p>
+      <p>每組先抽一張情境卡，然後把大家的機器人畫成適當的比例，放進同一個場景。</p>
+      <p>一起討論在這個情境裡，你們的機器人會怎麼互動，把它演出來，並準備一段 30 秒到 1 分鐘的錄影。」</p>
+      <p>（計時 10 分鐘：按 T 開始。時間內完成錄影並上傳，時間到之後進入下一頁播放影片）</p>
+    </aside>
+  </section>
+
+  <section class="slide vslide" data-code="W5" data-speaker="主持人">
     <p class="eyebrow in" style="--d:.1">小組</p>
     <h2 class="t3 in" style="--d:.2">把你們的機器人<span class="grad">演出來</span></h2>
     <p class="lead in" style="--d:.3">每組抽一個情境演出</p>
@@ -1006,7 +1124,31 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
     </aside>
   </section>
 
-  <section class="slide center" data-code="W4" data-speaker="主持人">
+  <section class="slide hb" data-code="W6" data-speaker="主持人" data-sheet="手冊 授權">
+    <div class="hb-head">
+      <div class="stack">
+        <p class="eyebrow in" style="--d:.1">手冊・成果授權</p>
+        <h2 class="t3 in" style="--d:.2">成果<span class="grad">授權</span></h2>
+        <p class="lead in" style="--d:.3">感謝您參與本次工作坊！</p>
+      </div>
+      <svg class="hbmap in" style="--d:.35" data-on="5" viewBox="0 0 400 230" role="img" aria-label="手冊區塊配置：目前在成果授權"></svg>
+    </div>
+    <div class="glass panel auth in" style="--d:.5">
+      <p>誠摯邀請您授權我們使用本次創作成果，作為後續研究、紀錄與展示之素材。<br>感謝您的想像與創作，讓我們能持續探索人與機器之間更多可能。</p>
+      <div class="auth-sign">
+        <div class="tr"><b>授權人簽名<small>（正楷）</small></b><i></i></div>
+        <div class="tr date"><b>日期</b><i></i><b>月</b><i></i><b>日</b></div>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>「最後，請翻到手冊右下角的『成果授權』。</p>
+      <p>我們想邀請大家授權我們使用今天的創作成果，作為後續研究、紀錄和展示的素材。如果您願意，請在這裡用正楷簽名，並寫上日期。</p>
+      <p>謝謝大家的想像與創作，讓我們能繼續探索人與機器之間更多的可能。」</p>
+      <p>（等大家簽完、收回手冊後，再進下一頁結尾）</p>
+    </aside>
+  </section>
+
+  <section class="slide center" data-code="W7" data-speaker="主持人">
     <h2 class="t2 in" style="--d:.2">關係是建立在<span class="grad">需求</span>之上</h2>
     <p class="lead in" style="--d:.6">今天的每一台機器人，都回應了你在關係中的需求</p>
     <aside class="notes">
@@ -1435,7 +1577,24 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
 })();
 
 </script>
-<!-- MUSIC:START 發想背景音樂（來源：scratchpad music_engine.js + music_ctl.js） -->
+<!-- MUSIC:START 手冊配置圖＋發想背景音樂（來源：scratchpad patch_music.py、music_engine.js、music_ctl.js） -->
+<script>
+(function(){
+  /* 手冊區塊配置圖：照手冊版面畫出三欄（虛線）、#02/#04 和 #03/授權的分隔線、#01 的圓圈和從「我」拉到 #03 的雙箭頭；目前這一區反白 */
+  var B=[[0,0,133,230,'#01',1],[133,0,134,180,'#02',2],[267,0,133,180,'#03',3],[133,180,134,50,'#04',4],[267,180,133,50,'授權',5]];
+  [].forEach.call(document.querySelectorAll('svg.hbmap'),function(s){
+    var on=+s.dataset.on,h='';
+    B.forEach(function(b){h+='<rect class="blk'+(b[5]===on?' on':'')+'" x="'+b[0]+'" y="'+b[1]+'" width="'+b[2]+'" height="'+b[3]+'"/>'});
+    h+='<rect class="sheet" x="0" y="0" width="400" height="230"/><path class="div dash" d="M133 0V230M267 0V230"/><path class="div" d="M133 180H400"/>'+
+       '<circle class="obj" cx="44" cy="66" r="15"/><circle class="obj" cx="44" cy="190" r="15"/>'+
+       '<path class="ln" d="M52 81 L60 112 M60 142 L52 175"/>'+
+       '<path class="ln" d="M78 123 H286 M280 118 L286 123 M286 133 H78 M84 138 L78 133"/>'+
+       '<circle class="me" cx="64" cy="128" r="12"/>';
+    B.forEach(function(b){h+='<text class="lbl'+(b[5]===on?' on':'')+'" x="'+(b[0]+10)+'" y="'+(b[1]+(b[3]<60?35:30))+'">'+b[4]+'</text>'});
+    s.innerHTML=h;
+  });
+})();
+</script>
 <script>
 /* 發想時的背景音樂：用 Web Audio 即時合成，不需要音樂檔、不用網路，也沒有版權問題
    輕鬆、乾淨的電子聲音，配合簡報的黑白像素風格：
@@ -1544,7 +1703,7 @@ window.WaziMusic=(function(){
 })();
 
 (function(){
-  /* 背景音樂跟著計時器走：W1、W2 計時中才播放；按 T 暫停、換頁會淡出，時間到時 4 秒淡出。
+  /* 背景音樂跟著計時器走：有計時的頁面（W1 回想關係用輕快版，W2–W4 手冊 #02–#04 用推進版）計時中才播放；按 T 暫停、換頁會淡出，時間到時 4 秒淡出。
      按 M 或點下方控制列的音量條可以靜音（重新開簡報會恢復有聲音） */
   if(!window.WaziMusic)return;
   var btn=document.getElementById('music'),muted=false,want=false,mood='calm',timeUp=false,lastKey='';
@@ -1554,7 +1713,7 @@ window.WaziMusic=(function(){
     if(on)WaziMusic.play(mood);else WaziMusic.stop(timeUp?4:1.5);
   }
   document.addEventListener('deck:timer',function(e){
-    var d=e.detail,w=!!(d.has&&d.running),m=d.code==='W2'?'focus':'calm',key=w+'|'+m;
+    var d=e.detail,w=!!(d.has&&d.running),m=d.code==='W1'?'calm':'focus',key=w+'|'+m;
     if(key===lastKey)return;lastKey=key;
     timeUp=!!(d.has&&d.left<=0);want=w;mood=m;update();
   });
