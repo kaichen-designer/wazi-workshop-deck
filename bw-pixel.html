@@ -232,9 +232,11 @@ body.music-muted #music{opacity:.28}
 .hbmap .lbl{font-family:var(--mono,var(--font));font-size:24px;font-weight:600;fill:var(--sub);letter-spacing:.06em}
 .hbmap .lbl.on{fill:var(--bg)}
 /* #02：兩欄照手冊，(2) 是有底色的那一欄；A、B 箭頭從「自己」穿過兩欄到 AI 機器人 */
-.hb2{position:relative;height:380px;display:grid;grid-template-columns:1fr 1fr;gap:28px;padding:0 170px}
-.hb2-col{display:flex;flex-direction:column;gap:14px;padding:34px 40px}
-.hb2-col b{font-size:34px;font-weight:600}
+.hb2{position:relative;height:450px;flex:none;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:90px 60px;padding:0 170px}
+.hb2-col{display:flex;flex-direction:column;justify-content:center;gap:14px;padding:30px 40px}
+.hb2-col b{font-size:34px;font-weight:600;display:flex;align-items:center;gap:14px;white-space:nowrap}
+.hb2-col b .chip{font-size:26px;padding:2px 18px}
+.hb2-col b .k{font-style:normal;font-size:40px;margin-left:4px}
 .hb2-col span{font-size:26px;line-height:1.5;color:var(--sub)}
 .hb2-col.fill{background:color-mix(in srgb,var(--fg) 9%,var(--bg))}
 .hb2-lines{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
@@ -244,12 +246,25 @@ body.music-muted #music{opacity:.28}
 /* #03：步驟＋規格標籤 */
 .hb3{grid-template-columns:5fr 6fr;gap:90px;align-items:start}
 .li-sub{display:block;font-size:28px;color:var(--sub);margin-top:6px}
-.tagcard{display:flex;flex-direction:column;gap:22px;padding:34px 44px 40px}
+/* W1 左欄內容較多：標題、說明縮小一點，讓第 3 步和下方控制列之間留出空間 */
+.slide[data-code="W1"] .stack{gap:24px}
+.slide[data-code="W1"] .t3{font-size:66px;line-height:1.25}
+.slide[data-code="W1"] .lead{font-size:34px}
+.w1-list{gap:32px;margin-top:10px}
+.w1-list li{font-size:36px}
+.w1-list .pair{margin-top:14px!important}
+.tagcard{display:flex;flex-direction:column;gap:14px;padding:30px 44px 34px}
 .tagcard .tag{align-self:flex-start;background:var(--fg);color:var(--bg);font-size:24px;font-weight:600;padding:4px 14px;letter-spacing:.08em}
 .tagcard .tr{display:flex;align-items:baseline;gap:16px;font-size:32px}
 .tagcard .tr b{font-weight:500;white-space:nowrap}
 .tagcard .tr b small{font-size:22px;color:var(--sub);font-weight:400}
 .tagcard .tr i{flex:1;min-width:60px;border-bottom:2px dotted var(--sub);transform:translateY(-6px)}
+.tagcard .tr .lv{font-size:28px;color:var(--sub);letter-spacing:.12em;margin-left:12px}
+/* W3 規格標籤：示範「圈選」低・中・高，像用筆畫一圈 */
+.tagcard .lv u{position:relative;display:inline-block;text-decoration:none;transition:color .5s}
+.tagcard .lv u.on{color:var(--fg)}
+.tagcard .lv .ring{position:absolute;left:50%;top:50%;width:62px;height:48px;transform:translate(-52%,-50%) rotate(-7deg);overflow:visible;pointer-events:none}
+.tagcard .lv .ring path{fill:none;stroke:var(--fg);stroke-width:2.6;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .6s cubic-bezier(.55,.1,.35,1) forwards;animation-delay:var(--rd,0s)}
 /* 成果授權：照手冊的文字和簽名欄 */
 .auth{display:flex;flex-direction:column;gap:48px;padding:44px 54px 50px}
 .auth p{margin:0;font-size:32px;line-height:1.75}
@@ -691,6 +706,10 @@ body.warping #mist{opacity:1}
 .cv-title span{display:block;margin-top:18px;font-size:82px;letter-spacing:-.005em;text-indent:0}
 .cv-info{margin-top:auto;display:flex;flex-direction:column;gap:14px}
 .cv-info p{margin:0;font-family:"Inter","Noto Sans TC","Microsoft JhengHei",sans-serif;font-weight:300;font-size:36px;letter-spacing:.02em;color:#F5F5F5}
+/* 封面右下：機密提醒，黑底白框，壓在像素背景上也看得清楚 */
+.cv-warn{position:absolute;right:160px;bottom:96px;display:flex;align-items:center;gap:26px;padding:26px 36px;background:#050505;border:2px solid #F5F5F5}
+.cv-warn b{flex:none;width:56px;height:56px;display:grid;place-items:center;background:#F5F5F5;color:#050505;font:700 40px/1 "Inter",Arial,sans-serif}
+.cv-warn p{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-weight:400;font-size:30px;line-height:1.5;letter-spacing:.04em;color:#F5F5F5}
 .cv-org{margin:44px 0 0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;font-weight:300;font-size:22px;letter-spacing:.06em;color:var(--sub)}
 /* 封面不顯示上方標誌列和下方控制列（標誌已在封面上） */
 #top,#dock{transition:opacity .4s ease}
@@ -758,12 +777,13 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
     <h1 class="cv-title in" style="--d:.2">CO－CREATION<span>WORKSHOP</span></h1>
     <div class="cv-info in" style="--d:.45">
       <p>活動日期｜11 月 27 日（週五）</p>
-      <p>報到時間｜09：00 － 09：05</p>
+      <p>活動時間｜09：00 － 10：30</p>
       <p>活動地點｜T2－308</p>
     </div>
     <p class="cv-org in" style="--d:.6">瓦茲科技｜研發部</p>
+    <div class="cv-warn in" style="--d:.75" role="note"><b aria-hidden="true">!</b><p>因機密考量<br>過程中請不要使用任何電子產品</p></div>
     <aside class="notes">
-      <p>（開場前）大家入座時先停在這頁，畫面上有日期、報到時間和地點。</p>
+      <p>（開場前）大家入座時先停在這頁，畫面上有日期、活動時間和地點，以及「因機密考量，過程中請不要使用任何電子產品」的提醒。開場時也口頭提醒一次。</p>
       <p>09：05 準時開始，按 → 進入第一頁。</p>
     </aside>
   </section>
@@ -788,7 +808,7 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
 
   <section class="slide" data-code="P3" data-speaker="執行長">
     <p class="eyebrow in" style="--d:.1">在共創開始之前，我們想先了解</p>
-    <h2 class="t2 in" style="--d:.25">你生活中重視的<span class="grad">關係</span>，<br>以及它們對你的<span class="grad">意義</span>。</h2>
+    <h2 class="t2 in" style="--d:.25">你生活中重視的<span class="grad">關係</span><br>以及它們對你的<span class="grad">意義</span></h2>
     <p class="lead in" style="--d:.5">先不用考慮科技或產品，從自己的經驗出發。</p>
     <aside class="notes">
       <p>「因此，在今天的共創活動開始之前，我們想先了解各位生活中重視的關係，以及這些關係對你們而言有什麼意義。</p>
@@ -799,16 +819,18 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
 
   <!-- ============ 工作坊：關係 ============ -->
 
-  <section class="slide" data-code="W1" data-speaker="主持人" data-timer="600" data-sheet="手冊 第一頁">
+  <section class="slide" data-code="W1" data-speaker="主持人" data-timer="600" data-sheet="手冊 #01">
     <div class="cols l">
       <div class="stack">
-        <p class="eyebrow in" style="--d:.1">手冊・第一頁</p>
-        <h2 class="t3 in" style="--d:.2">想想你與他人<br>平常如何<span class="grad">相處</span>。</h2>
-        <p class="lead in" style="--d:.35">你帶給對方什麼？對方又帶給你什麼？</p>
-        <ol class="list num in" style="--d:.5">
-          <li>在圓圈中寫下某個對象</li>
-          <li><span>沿著箭頭，寫下你們互動中的交流
-            <span class="pair" style="margin-top:18px"><span class="chip a">A 我付出</span><span class="chip b">B 我得到</span></span></span></li>
+        <p class="eyebrow in" style="--d:.1">手冊・#01</p>
+        <h2 class="t3 in" style="--d:.2">在關係中<br>我為別人<span class="grad">做了什麼</span>？</h2>
+        <p class="lead in" style="--d:.35">回想生活中的人際關係，寫下你們的來往</p>
+        <ol class="list num in w1-list" style="--d:.5">
+          <li>在圓圈中寫下對象</li>
+          <li><span>寫下做過的事及給予的情感
+            <span class="pair" style="margin-top:14px"><span class="chip a">A 你為對方</span><span class="chip b">B 對方為你</span></span></span></li>
+          <li><span>標記重複出現、類似，或讓你感到有意義的
+            <span class="pair" style="margin-top:14px"><span class="chip a">A 願意持續付出</span><span class="chip b">B 希望持續獲得</span></span></span></li>
         </ol>
       </div>
       <svg class="diagram in" style="--d:.4;width:100%;max-height:720px" viewBox="0 0 600 580" aria-label="關係圖示意">
@@ -829,14 +851,14 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
         <text class="dlabel a" x="262" y="205">A</text>
         <text class="dlabel b" x="338" y="205">B</text>
         <text class="ntext s" x="300" y="90">對象</text>
-        <text class="ntext dark" x="300" y="330">自己</text>
+        <text class="ntext dark" x="300" y="330">我</text>
       </svg>
     </div>
     <aside class="notes">
-      <p>「請翻到手冊第一頁。</p>
-      <p>想想你和身邊的人平常是怎麼相處的。在圓圈裡寫下一個對象，不一定要是人，寵物、植物、一個地方都可以。至少寫一個，虛線的圓圈可以視情況再多寫。</p>
-      <p>然後沿著箭頭，寫下你們之間的交流。從你指出去的箭頭是 A，我付出：你帶給對方什麼？指向你的箭頭是 B，我得到：對方帶給你什麼？</p>
-      <p>箭頭上可以寫具體的事，例如幫忙做什麼、給了什麼東西；也可以寫抽象的感受，例如安心、被理解。兩邊不需要一樣多，照實際情況寫就好，沒有標準答案。」</p>
+      <p>「請翻到手冊的 #01：在關係中，我為別人做了什麼？</p>
+      <p>請回想生活中的人際關係，在圓圈裡寫下對象，不一定要是人，寵物、植物、一個地方都可以。圓圈不夠可以自己再畫。</p>
+      <p>然後在箭頭上寫下你們的來往。從你指出去的箭頭是 A：你為對方做過的事，以及給予的情感。指向你的箭頭是 B：對方為你做過的事，以及給予的情感。具體的事、抽象的感受都可以，兩邊不需要一樣多。</p>
+      <p>寫完之後請做標記：在不同關係中重複出現或類似的，或是讓你感到有意義的。願意持續付出的，標成 A；希望持續獲得的，標成 B。下一個步驟會用到這些標記。」</p>
       <p>（計時 10 分鐘：按 T 開始）</p>
       <p>（寫完）「謝謝大家。請把手冊留在手邊，等一下會用到。接下來，請瓦茲科技的執行長再跟大家說幾句話。」</p>
     </aside>
@@ -964,14 +986,15 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
       </svg>
       <div class="who">
         <div class="w"><i class="dk"></i><div><span class="sheet">瓦茲科技</span><b>達克</b><p>各項性能領先<br>銷售卻一路下滑</p></div></div>
-        <div class="w"><i class="kp"></i><div><span class="sheet">另一家公司</span><b>Kopei</b><p>功能品質較不佳<br>但被大眾接受</p></div></div>
+        <div class="w"><i class="kp"></i><div><span class="sheet">另一家公司</span><b>Kopei</b><p>舊型、需要人幫忙<br>銷售卻一路上升</p></div></div>
         <p class="unit">季銷售量（萬台）</p>
       </div>
     </div>
     <aside class="notes">
       <p>「但最近，我們遇到了一個問題。</p>
       <p>我們的產品達克，明明在各項性能上都超越其他競爭對手，銷售表現卻不如預期。</p>
-      <p>更令我們意外的是，另一家公司的 Kopei，功能和品質都比較不好，卻被越來越多人接受。」</p>
+      <p>更令我們意外的是，另一家公司推出的舊型機器人 Kopei，明明性能不如我們，銷量卻超越了達克。</p>
+      <p>它甚至因為自身能力有限，有時還需要人類的協助。」</p>
       <p>（可選）「其實整個家用機器人市場還在成長，問題不是景氣，而是大家沒有選擇達克。」</p>
       <p>（折線圖會慢慢畫出來，停留久一點，讓大家看兩條線交叉。數字皆為虛構。）</p>
     </aside>
@@ -979,24 +1002,24 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
 
   <section class="slide center" data-code="P8" data-speaker="執行長">
     <p class="eyebrow in" style="--d:.1">我們開始懷疑</p>
-    <h2 class="t2 in" style="--d:.25">人們對機器人的期待<br>是不是不只是<br>它能完成<span class="grad">多少事情</span>？</h2>
+    <h2 class="t2 in" style="--d:.25">在一段關係中<br>除了希望被滿足<br>是不是也想<span class="grad">為對方做些什麼</span>？</h2>
     <aside class="notes">
-      <p>「我們開始懷疑，是不是有些人對機器人的期待，並不只是它能完成多少事情？」</p>
+      <p>「我們開始懷疑：人在一段關係中，除了希望自己的需求被滿足，會不會也希望能為對方做些什麼？」</p>
       <p>（說完停 3 秒，讓問題留在現場）</p>
     </aside>
   </section>
 
   <section class="slide" data-code="P9" data-speaker="執行長">
     <p class="eyebrow in" style="--d:.1">邀請各位一起共創</p>
-    <h2 class="t2 in" style="--d:.2">設計一台你願意與它<br>建立<span class="grad">某種關係</span>的機器人</h2>
+    <h2 class="t2 in" style="--d:.2">設計一台<br><span class="grad">會需要你</span>的機器人</h2>
     <div class="specs" style="grid-template-columns:1fr 1fr">
-      <div class="glass panel in" style="--d:1"><p class="body">它可以非常強大，<br>也可以有自己的限制。</p></div>
+      <div class="glass panel in" style="--d:1"><p class="body">它有能為你做的事<br>也有做不到、需要你的地方</p></div>
       <div class="glass panel in" style="--d:1.5"><p class="body">最重要的是：<br><span class="grad strong">你為什麼這樣設計？</span></p></div>
     </div>
     <aside class="notes">
       <p>「因此，今天我們想邀請各位一起共創。</p>
-      <p>請根據剛才對人際關係的思考，設計一台你願意與它建立某種關係的機器人。</p>
-      <p>它可以非常強大，也可以有自己的限制。最重要的是，我們想知道你為什麼這樣設計。</p>
+      <p>請根據剛才對人際關係的思考，設計一台會需要你的機器人。</p>
+      <p>它有能為你做的事，也有它做不到、需要你幫忙的地方。最重要的是，我們想知道你為什麼這樣設計。</p>
       <p>接下來，請主持人說明設計的方式。」</p>
     </aside>
   </section>
@@ -1008,32 +1031,35 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
     <div class="hb-head">
       <div class="stack">
         <p class="eyebrow in" style="--d:.1">手冊・#02</p>
-        <h2 class="t3 in" style="--d:.2">創造一個新的<span class="grad">社交角色</span></h2>
-        <p class="lead in" style="--d:.3">它會帶給你什麼？而你願意或希望為它做些什麼？</p>
+        <h2 class="t3 in" style="--d:.2">創造一個<span class="grad">會需要你</span>的 AI 機器人</h2>
+        <p class="lead in" style="--d:.3">將自己在不同人際關係中的互動元素，依照指示組成一個新角色</p>
       </div>
       <svg class="hbmap in" style="--d:.35" data-on="2" viewBox="0 0 400 230" role="img" aria-label="手冊區塊配置：目前在 #02"></svg>
     </div>
     <div class="hb2 in" style="--d:.5">
-      <div class="glass panel hb2-col"><b>(1) 描述想建立來往的互動</b><span>從 #01 的關係裡，挑出你想要的互動元素</span></div>
-      <div class="glass panel hb2-col fill"><b>(2) 轉化成機器人具體特質</b><span>把互動組成新角色的能力、個性和樣子</span></div>
-      <svg class="hb2-lines" viewBox="0 0 1600 380" aria-label="自己與 AI 機器人之間的 A、B 箭頭">
-        <path id="hb2a" class="arrow a" d="M150 250 H1440" marker-end="url(#mA)"/>
-        <path id="hb2b" class="arrow b" d="M1450 290 H160" marker-end="url(#mB)"/>
+      <div class="glass panel hb2-col"><b>(1) 寫下 1–3 個被標記的 <span class="chip a">A</span></b><span>你願意持續付出的事和情感</span></div>
+      <div class="glass panel hb2-col fill"><b>將 A 轉化成 AI 機器人的<em class="k">限制</em></b><span>它做不到、需要你的地方</span></div>
+      <div class="glass panel hb2-col"><b>(2) 寫下 1–3 個被標記的 <span class="chip b">B</span></b><span>你希望持續獲得的事和情感</span></div>
+      <div class="glass panel hb2-col fill"><b>將 B 轉化成 AI 機器人的<em class="k">功能</em></b><span>它能為你做的事</span></div>
+      <svg class="hb2-lines" viewBox="0 0 1600 450" aria-label="我與 AI 機器人之間的 A、B 箭頭">
+        <path class="arrow a" d="M776 90 H818" marker-end="url(#mA)"/>
+        <path class="arrow b" d="M776 360 H818" marker-end="url(#mB)"/>
+        <path id="hb2a" class="arrow a" d="M150 211 H1440" marker-end="url(#mA)"/>
+        <path id="hb2b" class="arrow b" d="M1450 239 H160" marker-end="url(#mB)"/>
         <circle class="dot a" r="6"><animateMotion dur="3.2s" repeatCount="indefinite"><mpath xlink:href="#hb2a"/></animateMotion></circle>
         <circle class="dot b" r="6"><animateMotion dur="3.2s" begin="1.6s" repeatCount="indefinite"><mpath xlink:href="#hb2b"/></animateMotion></circle>
-        <circle class="node self" cx="72" cy="270" r="66"/>
-        <circle class="node" cx="1528" cy="270" r="66"/>
-        <text class="ntext dark" x="72" y="270">自己</text>
-        <text class="ntext s" x="1528" y="270">AI 機器人</text>
-        <text class="hb2-lbl a" x="800" y="222">(A) 你願意或希望為它做些什麼</text>
-        <text class="hb2-lbl b" x="800" y="332">(B) 它會帶給你什麼</text>
+        <circle class="node self" cx="72" cy="225" r="66"/>
+        <circle class="node" cx="1528" cy="225" r="66"/>
+        <text class="ntext dark" x="72" y="225">我</text>
+        <text class="ntext s" x="1528" y="225">AI 機器人</text>
       </svg>
     </div>
     <aside class="notes">
-      <p>「請看手冊的 #02。</p>
-      <p>剛剛執行長說，想請大家設計一台你願意與它建立某種關係的機器人。我們要把它想成一個新的社交角色，一個會加入你生活的新成員。</p>
-      <p>先在 (1) 寫下你想和它建立哪些來往，可以從 #01 的關係裡挑出你想要的互動；再在 (2) 把這些互動轉化成機器人具體的特質。</p>
-      <p>中間的箭頭和 #01 一樣有 A 和 B：A 是你願意或希望為它做些什麼？B 是它會帶給你什麼？」</p>
+      <p>「請看手冊的 #02：創造一個會需要你的 AI 機器人。</p>
+      <p>我們要把你在不同人際關係中的互動元素，組成一個新角色。</p>
+      <p>先在 (1) 寫下 1 到 3 個你在 #01 標成 A 的，也就是你願意持續付出的；再把它們轉化成這台 AI 機器人的限制，也就是它做不到、需要你的地方。</p>
+      <p>接著在 (2) 寫下 1 到 3 個標成 B 的，也就是你希望持續獲得的；再把它們轉化成 AI 機器人的功能。</p>
+      <p>中間的箭頭和 #01 一樣：A 是你給它的，B 是它給你的。」</p>
       <p>（計時 8 分鐘：按 T 開始）</p>
     </aside>
   </section>
@@ -1043,28 +1069,30 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
       <div class="stack">
         <p class="eyebrow in" style="--d:.1">手冊・#03</p>
         <h2 class="t3 in" style="--d:.2">畫出<span class="grad">他／她／它／牠</span></h2>
-        <p class="lead in" style="--d:.3">把你的機器人畫出來，再填上規格標籤</p>
+        <p class="lead in" style="--d:.3">可以在畫中標示特殊構造、功能，或是具有限制的地方</p>
       </div>
       <svg class="hbmap in" style="--d:.35" data-on="3" viewBox="0 0 400 230" role="img" aria-label="手冊區塊配置：目前在 #03"></svg>
     </div>
     <div class="cols hb3">
       <ol class="list num in" style="--d:.45">
-        <li>畫出你的機器人</li>
+        <li><span>畫出你的 AI 機器人<small class="li-sub">標示特殊構造、功能或限制</small></span></li>
         <li>填上規格標籤</li>
-        <li><span>交流<small class="li-sub">與小組成員分享你的機器人</small></span></li>
+        <li><span>交流<small class="li-sub">與小組成員分享你的 AI 機器人</small></span></li>
       </ol>
       <div class="glass panel tagcard in" style="--d:.55">
         <span class="tag">規格標籤</span>
         <div class="tr"><b>名字</b><i></i></div>
         <div class="tr"><b>高度</b><i></i><b>重量</b><i></i></div>
-        <div class="tr"><b>性能<small>（記憶體容量、續航、移動…）</small></b><i></i></div>
-        <div class="tr"><b>核心功能</b><i></i></div>
+        <div class="tr"><b>記憶容量</b><span class="lv" data-pick="2"><u>低</u>・<u>中</u>・<u>高</u></span></div>
+        <div class="tr"><b>電池續航</b><span class="lv" data-pick="0"><u>低</u>・<u>中</u>・<u>高</u></span></div>
+        <div class="tr"><b>運算速度</b><span class="lv" data-pick="1"><u>低</u>・<u>中</u>・<u>高</u></span></div>
+        <div class="tr"><b>依賴程度</b><span class="lv" data-pick="2"><u>低</u>・<u>中</u>・<u>高</u></span></div>
       </div>
     </div>
     <aside class="notes">
-      <p>「請看手冊的 #03。把你剛剛設計的機器人畫出來，他、她、它或牠都可以，不用畫得很好，看得出特色就好。</p>
-      <p>畫完之後填上規格標籤：名字、高度、重量、性能，例如記憶體容量、續航、怎麼移動，還有它的核心功能。</p>
-      <p>最後花幾分鐘和小組成員分享你的機器人。」</p>
+      <p>「請看手冊的 #03。把你剛剛設計的 AI 機器人畫出來，他、她、它或牠都可以，不用畫得很好，看得出特色就好。畫的時候可以標示它特殊的構造、功能，或是有限制的地方。</p>
+      <p>畫完之後填上規格標籤：名字、高度、重量，再圈出記憶容量、電池續航、運算速度和依賴程度是低、中還是高。</p>
+      <p>最後花幾分鐘和小組成員分享你的 AI 機器人。」</p>
       <p>（計時 15 分鐘：按 T 開始）</p>
     </aside>
   </section>
@@ -1074,7 +1102,7 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
       <div class="stack">
         <p class="eyebrow in" style="--d:.1">手冊・#04｜小組</p>
         <h2 class="t3 in" style="--d:.2">如何<span class="grad">互動</span>？</h2>
-        <p class="lead in" style="--d:.3">請與小組共創，抽一個情境並演出機器人們的互動</p>
+        <p class="lead in" style="--d:.3">請與小組共創，抽一個事件並演出 AI 機器人們的互動</p>
       </div>
       <svg class="hbmap in" style="--d:.35" data-on="4" viewBox="0 0 400 230" role="img" aria-label="手冊區塊配置：目前在 #04"></svg>
     </div>
@@ -1082,23 +1110,24 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
       <div class="glass panel spec in" style="--d:.5">
         <span class="i">01</span>
         <svg class="hbicon" viewBox="0 0 160 90" aria-hidden="true"><rect x="38" y="10" width="54" height="72" rx="5" transform="rotate(-10 65 46)"/><rect x="66" y="8" width="54" height="72" rx="5" class="f"/><text x="93" y="52">?</text></svg>
-        <div class="stack"><span class="t">一組抽一張情境卡</span><span class="d">決定你們要演出的情境</span></div>
+        <div class="stack"><span class="t">一組抽一張事件卡</span><span class="d">互相討論自己與 AI 機器人會發生什麼</span></div>
       </div>
       <div class="glass panel spec in" style="--d:.75">
         <span class="i">02</span>
         <svg class="hbicon" viewBox="0 0 160 90" aria-hidden="true"><circle cx="48" cy="22" r="11"/><path d="M48 33 V62 M34 44 H62 M48 62 L38 84 M48 62 L58 84"/><circle cx="102" cy="48" r="7"/><path d="M102 55 V72 M93 62 H111 M102 72 L96 84 M102 72 L108 84"/><path class="thin" d="M130 6 V84 M126 6 H134 M126 45 H134 M126 84 H134"/></svg>
-        <div class="stack"><span class="t">畫出適當比例的角色</span><span class="d">把大家的機器人放進同一個場景</span></div>
+        <div class="stack"><span class="t">畫出符合比例的角色狀態</span><span class="d">與組員比例大小一致、貼合事件</span></div>
       </div>
       <div class="glass panel spec in" style="--d:1">
         <span class="i">03</span>
         <svg class="hbicon" viewBox="0 0 160 90" aria-hidden="true"><rect x="22" y="22" width="86" height="56" rx="6"/><path d="M108 40 L136 26 V74 L108 60 Z"/><circle cx="42" cy="50" r="7" class="f"/><text x="74" y="56" class="s">REC</text></svg>
-        <div class="stack"><span class="t">共同討論、演出角色在情境中的互動</span><span class="d">並準備 30 秒到 1 分鐘的錄影片段</span></div>
+        <div class="stack"><span class="t">搭配旁白共同演出</span><span class="d">角色們與人類們在此情境中的互動，並準備 30 秒到 1 分鐘的錄影橋段</span></div>
       </div>
     </div>
     <aside class="notes">
       <p>「請看手冊的 #04，接下來是小組時間。</p>
-      <p>每組先抽一張情境卡，然後把大家的機器人畫成適當的比例，放進同一個場景。</p>
-      <p>一起討論在這個情境裡，你們的機器人會怎麼互動，把它演出來，並準備一段 30 秒到 1 分鐘的錄影。」</p>
+      <p>每組先抽一張事件卡，互相討論在這個事件裡，自己和 AI 機器人會發生什麼。</p>
+      <p>接著畫出和組員比例大小一致、貼合這個事件的角色狀態。</p>
+      <p>最後搭配旁白，一起演出角色們和人類們在這個情境中的互動，並準備一段 30 秒到 1 分鐘的錄影橋段。」</p>
       <p>（計時 10 分鐘：按 T 開始。時間內完成錄影並上傳，時間到之後進入下一頁播放影片）</p>
     </aside>
   </section>
@@ -1106,7 +1135,7 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
   <section class="slide vslide" data-code="W5" data-speaker="主持人">
     <p class="eyebrow in" style="--d:.1">小組</p>
     <h2 class="t3 in" style="--d:.2">把你們的機器人<span class="grad">演出來</span></h2>
-    <p class="lead in" style="--d:.3">每組抽一個情境演出</p>
+    <p class="lead in" style="--d:.3">每組抽一個事件演出</p>
     <div class="vgal in" style="--d:.45">
       <div class="vgrid"></div>
       <div class="vbar">
@@ -1117,7 +1146,7 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
       <input type="file" class="vinput" webkitdirectory multiple hidden>
     </div>
     <aside class="notes">
-      <p>「接下來，請每組抽一個情境，把你們的機器人演出來。演的時候請一位組員用手機錄下來，錄好之後上傳到雲端資料夾裡你們這組的資料夾。上傳完成的影片，會出現在畫面上你們組別的位置。」</p>
+      <p>「接下來，請每組抽一個事件，把你們的 AI 機器人演出來。演的時候請一位組員用手機錄下來，錄好之後上傳到雲端資料夾裡你們這組的資料夾。上傳完成的影片，會出現在畫面上你們組別的位置。」</p>
       <p>（操作）第一次進這頁先點「選擇影片資料夾」，選 G: 槽裡的影片資料夾（裡面有「第1組」「第2組」…子資料夾的那一層）。之後每 3 秒會自動抓新影片。同一組有好幾支時播最新的；直接放在外層的影片會排在最後，標成「未分組」。</p>
       <p>（播放）點影片卡放大播放。空白鍵播放／暫停，← → 倒退／快轉 5 秒，Esc 關閉。播放時按鍵不會換頁。</p>
       <p>（事前準備）資料夾在 G: 槽按右鍵選「離線使用」。工作坊開始前雙擊「影片轉檔小幫手.bat」並讓視窗開著：iPhone、Android 直接上傳的影片（包含 HEVC、HDR、MOV、3GP、MKV）會自動轉成這台電腦能播的 MP4，卡片會先顯示「轉檔中」，轉好就能播。</p>
@@ -1149,11 +1178,12 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
   </section>
 
   <section class="slide center" data-code="W7" data-speaker="主持人">
-    <h2 class="t2 in" style="--d:.2">關係是建立在<span class="grad">需求</span>之上</h2>
-    <p class="lead in" style="--d:.6">今天的每一台機器人，都回應了你在關係中的需求</p>
+    <h2 class="t2 in" style="--d:.2">關係是建立在<span class="grad">需求</span>上</h2>
+    <p class="lead in" style="--d:.6">感謝大家這次的參與</p>
     <aside class="notes">
-      <p>「謝謝大家今天的設計。就像一開始說的，關係是建立在需求之上，今天的每一台機器人，都回應了你在關係中的需求。</p>
-      <p>也謝謝大家願意寫下自己的關係，那是今天最珍貴的東西。」</p>
+      <p>「就像一開始說的，關係是建立在需求上。而需求是雙向的：我們希望被滿足，也希望能為對方做些什麼、被對方需要。</p>
+      <p>今天大家設計的機器人，都有做不到、需要你的地方，它們也為人留下了被需要的位置。</p>
+      <p>感謝大家這次的參與，也謝謝大家願意寫下自己的關係，那是今天最珍貴的東西。」</p>
     </aside>
   </section>
 
@@ -1313,11 +1343,13 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
     try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
   }
   function next(){
+    if(!slides[cur])return;   /* 頁面還沒載入完就點擊時不動作 */
     var s=slides[cur],h=s.querySelector('.frag:not(.on)');
     if(h){h.classList.add('on');runCounters(h);document.dispatchEvent(new CustomEvent('deck:frag'));return}
     if(cur<slides.length-1)show(cur+1,false,'fwd');
   }
   function prev(){
+    if(!slides[cur])return;
     var on=slides[cur].querySelectorAll('.frag.on');
     if(on.length){on[on.length-1].classList.remove('on');return}
     if(cur>0)show(cur-1,true,'back');
@@ -1456,6 +1488,7 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
     var a=document.querySelector('.slide.active'),U=null,rng=document.createRange();
     if(a)[].slice.call(a.querySelectorAll('.cv-logo,h1,h2,h3,p,li,.chip,.glass,.vgal,button,.dak-hero .dk-name,.dak-hero .dk-sub,svg circle,svg ellipse,svg rect,svg path,svg line,svg text,svg polyline,svg use')).forEach(function(e){
       if(e.closest('.notes,defs,symbol,marker,.glass')&&!e.classList.contains('glass'))return;
+      if(e.closest('.cv-warn'))return;   /* 封面的機密提醒另外算一小塊，不然整個畫面都會被算成文字區 */
       /* 文字只量字實際佔到的寬度（段落本身是整行寬，會把整個畫面都算成文字區） */
       var r=/^(H1|H2|H3|P|LI)$/.test(e.tagName)?textRect(e,rng):e.getBoundingClientRect();if(!r)return;
       if(r.width<2||r.height<2)return;
@@ -1468,6 +1501,8 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
     ['#top .brand','#code','#dock','#toast:not(.hide)'].forEach(function(s){var e=document.querySelector(s);if(!e)return;
       if(a&&a.classList.contains('cover')&&s!=='#toast:not(.hide)')return;   /* 封面隱藏了標誌列和控制列 */
       var r=e.getBoundingClientRect();if(r.width>2)small.push(box(r,3))});
+    /* 機密提醒：四周多留一圈空白，點陣再慢慢淡進來，框邊不會被點擠滿 */
+    var w=a&&a.querySelector('.cv-warn');if(w){var wr=w.getBoundingClientRect();if(wr.width>2){var wb=box(wr,4);wb.f=9;wb.r=(wb.y1-wb.y0)/2;wb.wob=1;small.push(wb)}}   /* 圓角取到一半高度、邊緣跟主區一樣起伏，不會有銳利的直角 */
   }
 
   /* 一段文字裡每個字串實際佔的範圍合起來（不含區塊本身多出來的空白寬度） */
@@ -1519,7 +1554,9 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
         var dm=sdBox(x,y,main,RAD)-(4.2+3.6*Math.sin(x*.135+t*.8)*Math.cos(y*.165-t*.6)+2.2*Math.sin((x-y)*.09+t*1.1));  /* 起伏只往外推，不會吃進文字區 */
         var z=ss(0,F,dm);
         if(z<=0){buf[i]=0;continue}
-        for(var q=0;q<small.length;q++){var ds=sdBox(x,y,small[q],5);if(ds<4){z*=ss(0,4,ds)}}
+        for(var q=0;q<small.length;q++){var sq=small[q],sf=sq.f||4,ds=sdBox(x,y,sq,sq.r||5);
+          if(sq.wob)ds-=2.2+1.8*Math.sin(x*.135+t*.8)*Math.cos(y*.165-t*.6)+1.2*Math.sin((x-y)*.09+t*1.1);
+          if(ds<sf){z*=ss(0,sf,ds)}}
         if(z<=0){buf[i]=0;continue}
         var sxp=x-sy;if(sk)sxp=Math.floor(sxp/seg)*seg;
         var nx=sxp/GH+wob,wy=ny+.05*Math.sin(nx*5.3+t*.45)+.025*Math.sin(nx*13-t*.8),v=0;
@@ -1597,29 +1634,33 @@ body:has(.slide.active.cover) #top,body:has(.slide.active.cover) #dock{opacity:0
 </script>
 <script>
 /* 發想時的背景音樂：用 Web Audio 即時合成，不需要音樂檔、不用網路，也沒有版權問題
-   輕鬆、乾淨的電子聲音，配合簡報的黑白像素風格：
-   柔和的長音、像音樂盒一樣的分解和弦、一顆顆亮起的訊號音（像像素點），沒有雜訊。
+   全部是純波形，沒有雜訊，不會蓋過討論。
    WaziMusic.play('calm' | 'focus')：3 秒淡入；WaziMusic.stop(秒)：淡出後暫停
-   calm  = W1 回想自己的關係：D 大調，輕快的流行和弦進行，音樂盒般的分解和弦，帶一點搖擺
-   focus = W2 設計機器人：F 大調，低低的脈衝往前推，訊號音分解和弦 */
+   calm  = W1 回想自己的關係：D 大調，80 BPM，音樂盒分解和弦帶一點搖擺
+   focus = W2–W4 設計、畫、演出：F 大調，84 BPM，低脈衝往前推＋訊號音分解和弦 */
 window.WaziMusic=(function(){
   var AC=window.AudioContext||window.webkitAudioContext;
-  var ctx=null,master,dry,verb,echo,padBus,arpBus,an;
+  var ctx=null,master,dry,verb,wet,echo,padBus,arpBus,an;
   var playing=false,mood='calm',sched=null,next=0,step=0,stopT=0,vol=.22,chordIdx=0,mel=3,held=[];
   var MOODS={
-    calm:{bpm:80,chordSteps:32,swing:.32,pad:.016,bass:.06,
+    /* 原版（11/24），未調整，留在試聽頁比較用 */
+    calm0:{bpm:80,chordSteps:32,swing:.32,pad:.016,bass:.06,wet:.38,acc:8,
       pulseEvery:8,pulseVol:.045,pulseAcc:.06,
-      arpProb:.6,arpVol:.034,arpTone:'box',arp:[0,1,2,3,2,1,3,2],
+      arpEvery:2,arpProb:.6,arpVol:.034,arpTone:'box',arp:[0,1,2,3,2,1,3,2],
       melProb:.2,melVol:.034,tick:0,
       chords:[[38,50,57,64,66,69],[49,52,57,61,64,69],[47,54,59,62,66,69],[43,55,59,62,66,69]],   /* D  A/C♯  Bm7  Gmaj9 */
       scale:[69,71,74,76,78,81,83,86]},
-    focus:{bpm:84,chordSteps:64,swing:.14,pad:.018,bass:.06,
+    focus0:{bpm:84,chordSteps:64,swing:.14,pad:.018,bass:.06,wet:.38,acc:8,
       pulseEvery:4,pulseVol:.07,pulseAcc:.095,
-      arpProb:.55,arpVol:.03,arpTone:'bell',arp:[0,2,1,3,0,3,2,1],
+      arpEvery:2,arpProb:.55,arpVol:.03,arpTone:'bell',arp:[0,2,1,3,0,3,2,1],
       melProb:.1,melVol:.032,tick:.009,
       chords:[[41,53,60,64,67,69],[41,53,60,64,67,71],[45,57,60,64,67,71],[38,50,57,60,64,65]],   /* Fmaj9  F(♯11)  Am9  Dm9 */
-      scale:[72,74,77,79,81,84,86,89]}
+      scale:[72,74,77,79,81,84,86,89]},
   };
+  /* 簡報裡用的版本（11/26）：原版的編曲，跳動的分解和弦和低脈衝再大聲一點、更清楚 */
+  function over(base,o){var r={},k;for(k in MOODS[base])r[k]=MOODS[base][k];for(k in o)r[k]=o[k];return r}
+  MOODS.calm=over('calm0',{arpVol:.056,arpProb:.7,pulseVol:.07,pulseAcc:.09});
+  MOODS.focus=over('focus0',{arpVol:.05,arpProb:.65,pulseVol:.1,pulseAcc:.13});
   function f(m){return 440*Math.pow(2,(m-69)/12)}
   function gain(v){var g=ctx.createGain();g.gain.value=v;return g}
   function impulse(sec){var n=Math.floor(ctx.sampleRate*sec),b=ctx.createBuffer(2,n,ctx.sampleRate);
@@ -1631,7 +1672,7 @@ window.WaziMusic=(function(){
     var makeup=gain(8);master.connect(makeup);makeup.connect(comp);comp.connect(ctx.destination);   /* 各聲部都很輕，整體補回到筆電喇叭聽得清楚的音量 */
     an=ctx.createAnalyser();an.fftSize=256;an.smoothingTimeConstant=.82;comp.connect(an);
     dry=gain(.8);dry.connect(master);
-    verb=ctx.createConvolver();verb.buffer=impulse(3);var wet=gain(.38);verb.connect(wet);wet.connect(master);
+    verb=ctx.createConvolver();verb.buffer=impulse(3);wet=gain(.22);verb.connect(wet);wet.connect(master);
     /* 回音：3 個十六分音符的延遲，越回越暗 */
     echo=ctx.createDelay(2);var fb=gain(.3),elp=ctx.createBiquadFilter();elp.type='lowpass';elp.frequency.value=3000;
     echo.connect(elp);elp.connect(fb);fb.connect(echo);var eo=gain(.42);elp.connect(eo);eo.connect(master);
@@ -1667,6 +1708,16 @@ window.WaziMusic=(function(){
     l.type='lowpass';l.frequency.setValueAtTime(1100,t);l.frequency.exponentialRampToValueAtTime(240,t+.18);
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.008);g.gain.exponentialRampToValueAtTime(.0004,t+.3);
     o.connect(l);l.connect(g);g.connect(dry);o.start(t);o.stop(t+.32)}
+  /* 底鼓：正弦波從高音快速掉到低音的「咚」，乾淨、圓潤，沒有雜訊 */
+  function kick(t,a){var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';
+    o.frequency.setValueAtTime(190,t);o.frequency.exponentialRampToValueAtTime(52,t+.11);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.004);g.gain.exponentialRampToValueAtTime(.0004,t+.28);
+    o.connect(g);g.connect(dry);o.start(t);o.stop(t+.3)}
+  /* 彈跳低音：短短的三角波，根音和高八度交替，讓節奏往前走 */
+  function bounce(m,t,a){var o=ctx.createOscillator(),g=ctx.createGain(),l=ctx.createBiquadFilter();o.type='triangle';o.frequency.value=f(m);
+    l.type='lowpass';l.frequency.value=1400;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.006);g.gain.exponentialRampToValueAtTime(.0004,t+.2);
+    o.connect(l);l.connect(g);g.connect(dry);o.start(t);o.stop(t+.22)}
   /* 輕輕的「答」：高音正弦波 20 毫秒，取代沙沙的鼓聲 */
   function tick(t,a){var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=2600;
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.002);g.gain.exponentialRampToValueAtTime(.0002,t+.025);
@@ -1675,12 +1726,14 @@ window.WaziMusic=(function(){
   function schedule(){
     if(!playing)return;var M=MOODS[mood],sd=60/M.bpm/4,ahead=ctx.currentTime+1.5;
     held=held.filter(function(h){return h.end>ctx.currentTime});
-    echo.delayTime.setValueAtTime(sd*3,ctx.currentTime);
+    echo.delayTime.setValueAtTime(sd*3,ctx.currentTime);wet.gain.setTargetAtTime(M.wet,ctx.currentTime,.5);
     while(next<ahead){
       var t=next,s=step%M.chordSteps,ch=M.chords[chordIdx%M.chords.length],ts=t+(step%4===2?sd*M.swing*2:0),i;
-      if(s===0){var d=M.chordSteps*sd;bass(ch[0],t,d,M.bass);for(i=1;i<ch.length;i++)pad(ch[i],t,d,M.pad)}
-      if(step%M.pulseEvery===0)pulse(ch[0]+12,t,step%16===0?M.pulseAcc:M.pulseVol);
-      if(step%2===0&&Math.random()<M.arpProb){var n=ch[2+M.arp[(step/2)%8]%4]+12,a=(step%8===0?1.25:1)*M.arpVol;
+      if(s===0){var d=M.chordSteps*sd;if(M.bass)bass(ch[0],t,d,M.bass);for(i=1;i<ch.length;i++)pad(ch[i],t,d,M.pad)}
+      if(M.pulseEvery&&step%M.pulseEvery===0)pulse(ch[0]+12,t,step%16===0?M.pulseAcc:M.pulseVol);
+      if(M.kick&&step%4===0)kick(t,step%16===0?M.kick:M.kick*.85);
+      if(M.bounce&&step%2===0)bounce(ch[0]+((step/2)%2?24:12),ts,(step%4===0?1:.8)*M.bounce);
+      if(step%M.arpEvery===0&&Math.random()<M.arpProb){var n=ch[2+M.arp[(step/M.arpEvery)%8]%4]+12,a=(step%M.acc===0?1.25:1)*M.arpVol;
         if(M.arpTone==='box')box(n,ts,a);else bell(n,ts,a)}
       if(step%2===0&&Math.random()<M.melProb){   /* 旋律：在音階上一步一步走，不亂跳 */
         mel=Math.max(0,Math.min(M.scale.length-1,mel+[-2,-1,-1,1,1,2][Math.floor(Math.random()*6)]));
@@ -1694,11 +1747,12 @@ window.WaziMusic=(function(){
     if(!AC)return false;if(!ctx)init();if(ctx.state!=='running')ctx.resume();clearTimeout(stopT);
     if(m&&MOODS[m]&&m!==mood){mood=m;if(playing){releaseHeld(2);step=0;chordIdx=0;next=Math.max(next,ctx.currentTime+.5)}}
     if(!playing){playing=true;next=ctx.currentTime+.1;step=0;chordIdx=0;schedule();sched=setInterval(schedule,250)}
-    ramp(vol,3);return true}
+    ramp(lv(),3);return true}
+  function lv(){return vol*(MOODS[mood].lvl||1)}   /* lvl：個別版本的整體音量微調（預設 1） */
   function stop(fade){
     if(!ctx||!playing)return;fade=fade==null?1.5:fade;ramp(0,fade);clearTimeout(stopT);
     stopT=setTimeout(function(){playing=false;clearInterval(sched);sched=null;ctx.suspend()},fade*1000+300)}
-  function setVolume(v){vol=v;if(ctx&&playing)ramp(v,.3)}
+  function setVolume(v){vol=v;if(ctx&&playing)ramp(lv(),.3)}
   return {play:play,stop:stop,setVolume:setVolume,isPlaying:function(){return playing},mood:function(){return mood},analyser:function(){return an}};
 })();
 
@@ -1972,6 +2026,30 @@ window.WaziMusic=(function(){
     if(slide.classList.contains('active'))start();
     else{stop();closePlayer();pauseThumbs()}
   });
+  if(slide.classList.contains('active'))start();
+})();
+</script>
+
+<script>
+/* W3 規格標籤：進到這頁時，依序把每一列的低・中・高圈起來；之後每 7 秒換一組，示範每台機器人的規格都不一樣 */
+(function(){
+  var slide=document.querySelector('.slide[data-code="W3"]');if(!slide)return;
+  var rows=[].slice.call(slide.querySelectorAll('.tagcard .lv')),timer=null,wait=null;
+  var RING='<svg class="ring" viewBox="0 0 100 60" preserveAspectRatio="none"><path pathLength="1" vector-effect="non-scaling-stroke" d="M58 7C84 6 97 22 90 38C82 54 40 58 17 49C0 42 1 22 18 12C30 5 46 4 64 9"/></svg>';
+  function mark(first){
+    rows.forEach(function(lv,i){
+      var us=lv.querySelectorAll('u'),cur=+lv.dataset.cur,n;
+      if(first)n=+lv.dataset.pick;else{do{n=Math.floor(Math.random()*3)}while(n===cur)}
+      lv.dataset.cur=n;
+      [].forEach.call(us,function(u,k){var r=u.querySelector('.ring');if(r)r.remove();u.classList.toggle('on',k===n)});
+      us[n].insertAdjacentHTML('beforeend',RING);
+      us[n].querySelector('.ring').style.setProperty('--rd',(i*.4)+'s');
+    });
+  }
+  function clear(){rows.forEach(function(lv){[].forEach.call(lv.querySelectorAll('u'),function(u){var r=u.querySelector('.ring');if(r)r.remove();u.classList.remove('on')})})}
+  function start(){stop();wait=setTimeout(function(){mark(true);timer=setInterval(function(){mark(false)},7000)},1700)}
+  function stop(){clearTimeout(wait);clearInterval(timer);timer=wait=null;clear()}
+  document.addEventListener('deck:change',function(){if(slide.classList.contains('active'))start();else stop()});
   if(slide.classList.contains('active'))start();
 })();
 </script>
